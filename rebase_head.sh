@@ -1,13 +1,13 @@
 #!/bin/bash
 
 log () {
-	tput setaf 6 # cyan
-	echo "[Rebaser] $1"
-	tput setaf 7 # white
+    tput setaf 6 # cyan
+    echo "[Rebaser] $1"
+    tput setaf 7 # white
 }
 
 quit () {
-	tput setaf 1 # red
+    tput setaf 1 # red
     echo "[Rebaser] $1"
     echo "Aborting rebase"
     tput setaf 7 # white
@@ -17,7 +17,7 @@ quit () {
 no_rebase_in_progress () {
     # pretty verbose but very fast way to test this that works anywhere in worktrees or subdirs
     (test -d "$(git rev-parse --git-path rebase-merge)" || \
-     test -d "$(git rev-parse --git-path rebase-apply)" ) || return 0
+    test -d "$(git rev-parse --git-path rebase-apply)" ) || return 0
     return 1
 }
 
