@@ -66,7 +66,7 @@ if [ -n "$CHANGED" ]; then
 fi
 
 CURRENT_INTEGRATION="origin/$TARGET_BRANCH"
-git rebase -i --autosquash $CURRENT_INTEGRATION  || quit "Failed to rebase"
+git rebase -i --autosquash $CURRENT_INTEGRATION || quit "Failed to rebase"
 
 while [[ ! no_rebase_in_progress ]]; do
     log "Running git merge tool"
@@ -83,7 +83,7 @@ while [[ ! no_rebase_in_progress ]]; do
     fi
     
     log "Continuing rebase"
-    git rebase --con
+    git rebase --con || quit "Failed to rebase"
 done
 
 if [ -n "$CHANGED" ]; then
