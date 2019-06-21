@@ -8,9 +8,9 @@ log () {
 
 quit () {
 	tput setaf 1 # red
-	echo "[Rebaser] $1"
+    echo "[Rebaser] $1"
     echo "Aborting rebase"
-	tput setaf 7 # white
+    tput setaf 7 # white
     exit 1
 }
 
@@ -69,16 +69,14 @@ CURRENT_INTEGRATION="origin/$TARGET_BRANCH"
 git rebase -i --autosquash $CURRENT_INTEGRATION  || quit "Failed to rebase"
 
 while [[ ! no_rebase_in_progress ]]; do
-    printf "Running git merge tool. Don't solve the conflicts if you want to end the rebase"
+    log "Running git merge tool"
     git mergetool
     
     if [[ `git status | grep "Unmerged paths" | wc -l` -eq 1 ]]; then
-        printf "There are still merge conflicts! Please resolve them and continue by hand."
-        exit 1
+        log "There are still merge conflicts!"
     fi
     
     read -p "${TAG}Do you want to continue rebasing? ${END_TAG}" -n 1 -r
-    printf    # (optional) move to a new line
     if [[ ! $REPLY =~ ^[Yy]$ ]]
     then
         quit "Stopping the rebase."
