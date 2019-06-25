@@ -23,7 +23,6 @@ no_rebase_in_progress () {
 
 no_rebase_in_progress || quit "There already is a rebase in progress"
 
-
 if [ -z "$1" ]; then
     if [ -z "$INTEGRATION" ]; then
         log "no INTEGRATION specified, trying to guess based on worktree"
@@ -51,12 +50,11 @@ else
     TARGET_BRANCH="$1"
 fi
 
-log "Starting rebase on on $TARGET_BRANCH"
-
 #tell visual studio to close
 log "Closing Visual Studio"
 vs_close.sh
 
+log "Fetching $TARGET_BRANCH"
 git fetch origin $TARGET_BRANCH || quit "Failed to fetch $TARGET_BRANCH"
 
 CHANGED=$(git diff-index --name-only HEAD --)
@@ -65,6 +63,7 @@ if [ -n "$CHANGED" ]; then
     git stash
 fi
 
+log "Starting rebase on on $TARGET_BRANCH"
 CURRENT_INTEGRATION="origin/$TARGET_BRANCH"
 git rebase -i --autosquash $CURRENT_INTEGRATION || quit "Failed to rebase"
 
