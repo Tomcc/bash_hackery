@@ -21,11 +21,10 @@ if len(sys.argv) == 1:
     print("Usage: {} <command>".format(sys.argv[0]))
     sys.exit(1)
 
-MIN_NOTIFICATION_DELAY = 60
-
-stats = sys.argv[1]
+MIN_NOTIFICATION_DELAY = 30
 
 # stats is a stat list that looks like: "1025 0:00 sleep 1"
+stats = sys.argv[1]
 
 # extract minutes and seconds
 minutes, seconds = stats.split()[1].split(":")
