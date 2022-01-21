@@ -24,20 +24,16 @@ if len(sys.argv) == 1:
 MIN_NOTIFICATION_DELAY = 30
 
 # stats is a stat list that looks like: "1025 0:00 sleep 1"
-stats = sys.argv[1]
+stats = sys.argv[1].split()
+time = stats[1]
 
-# extract minutes and seconds
-minutes, seconds = stats.split()[1].split(":")
+# extract minutes and seconds and sum them up
+minutes, seconds = time.split(":")
+total_seconds = int(minutes) * 60 + int(seconds)
 
 # extract the command and its args
-command = stats.split()[2:]
-
-# convert list to single string
-command = " ".join(command)
-
-# sum up the minutes and seconds
-seconds = int(minutes) * 60 + int(seconds)
+command = " ".join(stats[2:])
 
 # if it's been long enough, send a notification
-if seconds > MIN_NOTIFICATION_DELAY:
-    notify("'{}' has been running for {} s".format(command, seconds))
+if total_seconds > MIN_NOTIFICATION_DELAY:
+    notify("'%s' finished in %s" % (command, time))
