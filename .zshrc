@@ -1,3 +1,5 @@
+# Add sbin to path
+export PATH="/usr/local/sbin:$PATH"
 
 # Cool prompts with arrows and shit
 PROMPT=$'%K{242}[%*]%k%K{238}%F{242}\ue0b0%f %B%~%b %k%F{238}\ue0b0%f '
