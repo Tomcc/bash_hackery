@@ -4,6 +4,8 @@ import subprocess
 
 
 def notify(msg):
+    msg = msg.replace("\"", "\\\"")
+
     # put the command in a raw string
     command = [
         "osascript",
