@@ -4,13 +4,13 @@ import subprocess
 
 
 def notify(msg):
-    msg = msg.replace("\"", "\\\"")
+    escaped = msg.replace("\"", "\\\"")
 
     # put the command in a raw string
     command = [
         "osascript",
         "-e",
-        f"display notification \"{msg}\" with title \"Command Completed\""
+        f"display notification \"{escaped}\" with title \"Command Completed\""
     ]
 
     subprocess.check_call(command)
