@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import os
 import subprocess
 
 
@@ -13,6 +14,14 @@ def notify(msg):
         f"display notification \"{escaped}\" with title \"Command Completed\""
     ]
 
+    # get tokens from the environment
+    pushover_long_command_token = os.getenv("PUSHOVER_LONG_COMMAND_TOKEN")
+    pushover_user = os.getenv("PUSHOVER_USER")
+
+    if not pushover_long_command_token or not pushover_user:
+        # throw exception
+        raise Exception("PUSHOVER_LONG_COMMAND_TOKEN and PUSHOVER_USER aren't set")
+
     subprocess.check_call(command)
 
     import http.client
@@ -20,8 +29,8 @@ def notify(msg):
     conn = http.client.HTTPSConnection("api.pushover.net:443")
     conn.request("POST", "/1/messages.json",
                  urllib.parse.urlencode({
-                     "token": "anmkht56itf2q2qdqhsz6q9bg86rz6",
-                     "user": "ustiwnc46mb3iakvtcx2er724u168n",
+                     "token": pushover_long_command_token,
+                     "user": pushover_user,
                      "message": msg,
                  }), {"Content-type": "application/x-www-form-urlencoded"})
     conn.getresponse()
