@@ -24,6 +24,9 @@ eval "$(direnv hook zsh)"
 # Secretive Config
 export SSH_AUTH_SOCK="/Users/tommaso/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
 
+# Aliases
+alias hconfig="/Applications/Houdini/Current/Frameworks/Houdini.framework/Versions/Current/Resources/bin/hconfig"
+
 # NVM installation
 source $HOME/dev/bash_hackery/nvm_hook.zsh
 
