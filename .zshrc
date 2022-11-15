@@ -25,7 +25,8 @@ eval "$(direnv hook zsh)"
 export SSH_AUTH_SOCK="/Users/tommaso/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
 
 # Aliases
-alias hconfig="/Applications/Houdini/Current/Frameworks/Houdini.framework/Versions/Current/Resources/bin/hconfig"
+alias hou_dpi_low="unset HOUDINI_UISCALE; \"/Applications/Houdini/Current/Houdini Apprentice 19.5.368.app/Contents/MacOS/happrentice\""
+alias hou_dpi_hi="export HOUDINI_UISCALE=200; \"/Applications/Houdini/Current/Houdini Apprentice 19.5.368.app/Contents/MacOS/happrentice\""
 
 # NVM installation
 source $HOME/dev/bash_hackery/nvm_hook.zsh
