@@ -13,6 +13,7 @@ setopt HIST_SAVE_NO_DUPS
 export EDITOR="code"
 alias less="less -R"
 alias discordify="magick mogrify -format jpg -resize 1920"
+alias gsuir="git submodule update --init --recursive"
 
 # look for the packages in this file's directory
 export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
