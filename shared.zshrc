@@ -20,8 +20,8 @@ export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
 # long command notification
 source "$ZSH_PACKAGES/long_command_notification.zsh"
 
-# syntax highlighting
-source "$ZSH_PACKAGES/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-
 # auto suggestions
 source "$ZSH_PACKAGES/zsh-autosuggestions/zsh-autosuggestions.zsh"
+
+# syntax highlighting
+source "$ZSH_PACKAGES/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
