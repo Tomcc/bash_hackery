@@ -1,5 +1,12 @@
+
+# Aliases
+alias hou_dpi_low="unset HOUDINI_UISCALE; echo 'Houdini DPI set to low'"
+alias hou_dpi_hi="export HOUDINI_UISCALE=200; echo 'Houdini DPI set to high'"
+
 # Add sbin to path
 export PATH="/usr/local/sbin:$PATH"
+
+# ---------------- plugins ----------------
 
 # DIRENV
 export DIRENV_LOG_FORMAT=
@@ -10,6 +17,7 @@ export SSH_AUTH_SOCK="/Users/tommaso/Library/Containers/com.maxgoedjen.Secretive
 
 # NVM installation
 source $HOME/dev/bash_hackery/nvm_hook.zsh
+
 
 # better history database
 export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
