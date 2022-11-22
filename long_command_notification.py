@@ -4,16 +4,32 @@ import os
 import subprocess
 
 
-def notify(msg):
+def toast_osx(title, msg):
     escaped = msg.replace("\"", "\\\"")
 
     # put the command in a raw string
     command = [
         "osascript",
         "-e",
-        f"display notification \"{escaped}\" with title \"Command Completed\""
+        f"display notification \"{escaped}\" with title \"{title}\""
     ]
 
+    subprocess.check_call(command)
+
+def toast_win(title, msg):
+    import winotify
+
+    # create a notification
+    toast = winotify.Notification(
+        app_id="Long commands",
+        title=title,
+        msg=msg
+    )
+
+    toast.show()
+
+
+def notify(msg):
     # get tokens from the environment
     pushover_long_command_token = os.getenv("PUSHOVER_LONG_COMMAND_TOKEN")
     pushover_user = os.getenv("PUSHOVER_USER")
@@ -22,7 +38,13 @@ def notify(msg):
         # throw exception
         raise Exception("PUSHOVER_LONG_COMMAND_TOKEN and PUSHOVER_USER aren't set")
 
-    subprocess.check_call(command)
+    if sys.platform == "darwin":
+        toast_osx("Command Completed", msg)
+    elif sys.platform == "linux":
+        # TODO: implement linux notification
+        pass
+    elif sys.platform == "win32":
+        toast_win("Command Completed", msg)
 
     import http.client
     import urllib
