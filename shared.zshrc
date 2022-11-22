@@ -14,6 +14,9 @@ export EDITOR="code"
 alias less="less -R"
 alias discordify="magick mogrify -format jpg -resize 1920"
 
+# look for the packages in this file's directory
+export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
+
 # long command notification
 source "$ZSH_PACKAGES/long_command_notification.zsh"
 

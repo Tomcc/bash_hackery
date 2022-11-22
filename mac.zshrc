@@ -12,6 +12,8 @@ export SSH_AUTH_SOCK="/Users/tommaso/Library/Containers/com.maxgoedjen.Secretive
 source $HOME/dev/bash_hackery/nvm_hook.zsh
 
 # better history database
+export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
+
 HISTDB_TABULATE_CMD=(sed -e $'s/\x1f/\t/g')
 source $HOME/dev/bash_hackery/zsh-histdb/sqlite-history.zsh
 autoload -Uz add-zsh-hook
@@ -35,9 +37,6 @@ _zsh_autosuggest_strategy_histdb_top() {
 }
 
 ZSH_AUTOSUGGEST_STRATEGY=histdb_top
-
-source /usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-
 
 # fork off into the shareď zshrc in the same folder
 SCRIPT_PATH="${(%):-%N}"
