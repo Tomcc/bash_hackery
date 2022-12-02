@@ -5,26 +5,23 @@ import subprocess
 
 
 def toast_osx(title, msg):
-    escaped = msg.replace("\"", "\\\"")
+    escaped = msg.replace('"', '\\"')
 
     # put the command in a raw string
     command = [
         "osascript",
         "-e",
-        f"display notification \"{escaped}\" with title \"{title}\""
+        f'display notification "{escaped}" with title "{title}"',
     ]
 
     subprocess.check_call(command)
+
 
 def toast_win(title, msg):
     import winotify
 
     # create a notification
-    toast = winotify.Notification(
-        app_id="Long commands",
-        title=title,
-        msg=msg
-    )
+    toast = winotify.Notification(app_id="Long commands", title=title, msg=msg)
 
     toast.show()
 
@@ -48,16 +45,27 @@ def notify(msg):
 
     import http.client
     import urllib
-    conn = http.client.HTTPSConnection("api.pushover.net:443")
-    conn.request("POST", "/1/messages.json",
-                 urllib.parse.urlencode({
-                     "token": pushover_long_command_token,
-                     "user": pushover_user,
-                     "message": msg,
-                 }), {"Content-type": "application/x-www-form-urlencoded"})
-    conn.getresponse()
 
-    print(msg)
+    conn = http.client.HTTPSConnection("api.pushover.net:443")
+    try:
+        conn.request(
+            "POST",
+            "/1/messages.json",
+            urllib.parse.urlencode(
+                {
+                    "token": pushover_long_command_token,
+                    "user": pushover_user,
+                    "message": msg,
+                }
+            ),
+            {"Content-type": "application/x-www-form-urlencoded"},
+        )
+        conn.getresponse()
+    except:
+        # Silence network failures
+        pass
+
+    print("Long command: " + msg)
 
 
 # complain if there are no args
