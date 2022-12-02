@@ -1,6 +1,6 @@
 
 # Aliases
-alias hou_dpi_low="unset HOUDINI_UISCALE; echo 'Houdini DPI set to low'"
+alias hou_dpi_low="export HOUDINI_UISCALE=100; echo 'Houdini DPI set to low'"
 alias hou_dpi_hi="export HOUDINI_UISCALE=200; echo 'Houdini DPI set to high'"
 
 # Add sbin to path
