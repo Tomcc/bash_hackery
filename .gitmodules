@@ -7,3 +7,6 @@
 [submodule "zsh-autosuggestions"]
 	path = zsh-autosuggestions
 	url = https://github.com/zsh-users/zsh-autosuggestions.git
+[submodule "pexp"]
+	path = pexp
+	url = git@github.com:Tomcc/pexp.git

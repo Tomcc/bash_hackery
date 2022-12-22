@@ -10,10 +10,13 @@ setopt HIST_IGNORE_SPACE
 setopt HIST_FIND_NO_DUPS
 setopt HIST_SAVE_NO_DUPS
 
+# various system settings
+
 export EDITOR="code"
 alias less="less -R"
 alias discordify="magick mogrify -format jpg -resize 1920"
 alias gsuir="git submodule update --init --recursive"
+export HOUDINI_LMINFO_VERBOSE=0
 
 # look for the packages in this file's directory
 export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
