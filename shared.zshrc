@@ -24,6 +24,10 @@ export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
 # long command notification
 source "$ZSH_PACKAGES/long_command_notification.zsh"
 
+# z directory jumping
+source "$ZSH_PACKAGES/zsh-z/zsh-z.plugin.zsh"
+autoload -U compinit && compinit
+
 # auto suggestions
 source "$ZSH_PACKAGES/zsh-autosuggestions/zsh-autosuggestions.zsh"
 

@@ -10,3 +10,6 @@
 [submodule "pexp"]
 	path = pexp
 	url = git@github.com:Tomcc/pexp.git
+[submodule "zsh-z"]
+	path = zsh-z
+	url = https://github.com/agkozak/zsh-z.git
