@@ -1,5 +1,5 @@
 # Cool prompts with arrows and shit
-PROMPT=$'%K{242}[%*]%k%K{238}%F{242}\ue0b0%f %B%~%b %k%F{238}\ue0b0%f '
+PROMPT=$'%K{248}[%*]%k%K{252}%F{248}\ue0b0%f %B%~%b %k%F{252}\ue0b0%f '
 RPROMPT="%?"
 
 # remove dupes from history
