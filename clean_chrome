@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Open a chrome with most caching off and in incognito mode
-open -na "Google\ Chrome" --args --new-window --incognito --aggressive-cache-discard \
+open -na "Google Chrome" --args --new-window --incognito --aggressive-cache-discard \
     --disable-notifications --disable-remote-playback-api \
     --disable-voice-input --enable-aggressive-domstorage-flushing \
-    --user-data-dir=$(mktemp -d)"
+    --user-data-dir="$(mktemp -d)" "$1"
