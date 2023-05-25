@@ -6,6 +6,10 @@ alias hou_dpi_hi="pexp HOUDINI_UISCALE 200 && echo 'Houdini DPI set to high'"
 # Add sbin to path
 export PATH="/usr/local/sbin:$PATH"
 
+# ---------------- normal shell extensions ----------------
+
+eval $(thefuck --alias smh)
+
 # ---------------- plugins ----------------
 
 # DIRENV
