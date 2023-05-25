@@ -14,9 +14,12 @@ setopt HIST_SAVE_NO_DUPS
 
 export EDITOR="code"
 alias less="less -R"
-alias discordify="magick mogrify -format jpg -resize 1920"
 alias gsuir="git submodule update --init --recursive"
 export HOUDINI_LMINFO_VERBOSE=0
+
+# make ssh stop bothering me about new keys & changed IPs
+alias sssh=ssh
+alias ssh="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 # look for the packages in this file's directory
 export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
