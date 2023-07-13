@@ -11,8 +11,8 @@ setopt HIST_FIND_NO_DUPS
 setopt HIST_SAVE_NO_DUPS
 
 # various system settings
-
 export EDITOR="code"
+
 alias less="less -R"
 alias gsuir="git submodule update --init --recursive"
 export HOUDINI_LMINFO_VERBOSE=0
@@ -23,6 +23,11 @@ alias ssh="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 # look for the packages in this file's directory
 export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
+
+# Pyenv initialization # TODO should it be a plugin?
+if command -v pyenv 1>/dev/null 2>&1; then
+  eval "$(pyenv init -)"
+fi
 
 # long command notification
 source "$ZSH_PACKAGES/long_command_notification.zsh"
