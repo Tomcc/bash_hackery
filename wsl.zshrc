@@ -8,7 +8,8 @@
 # Let's add back paths that are actually safe
 
 # code
-export PATH="$PATH:/mnt/c/Users/<user>/AppData/Local/Programs/Microsoft VS Code/bin/code"
+# TODO automatically find the user somehow?
+export PATH="$PATH:/mnt/c/Users/c-tom/AppData/Local/Programs/Microsoft VS Code/bin/code"
 
 # call into linux.zshrc
 SCRIPT_PATH="${(%):-%N}"
