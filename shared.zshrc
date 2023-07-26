@@ -17,9 +17,13 @@ alias less="less -R"
 alias gsuir="git submodule update --init --recursive"
 export HOUDINI_LMINFO_VERBOSE=0
 
+# ---------------- normal shell extensions ----------------
+
 # DIRENV
 export DIRENV_LOG_FORMAT=
 eval "$(direnv hook zsh)"
+
+# ---------------- plugins ----------------
 
 # look for the packages in this file's directory
 export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
