@@ -1,3 +1,5 @@
+# start ssh-agent silently
+eval $(ssh-agent -s) > /dev/null
 
 # ---------------- normal shell extensions ----------------
 
