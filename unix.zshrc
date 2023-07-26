@@ -20,6 +20,9 @@ eval $(thefuck --alias smh)
 
 # --------------- sqlite history 
 
+# look for the packages in this file's directory
+export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
+
 # setup pexp
 source $ZSH_PACKAGES/pexp/pexp_setup.sh
 

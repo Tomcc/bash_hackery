@@ -15,6 +15,9 @@ export CARGO_PROFILE_TEST_SPLIT_DEBUGINFO=unpacked
 # Secretive Config
 export SSH_AUTH_SOCK="/Users/tommaso/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
 
+# look for the packages in this file's directory
+export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
+
 # NVM installation
 source $ZSH_PACKAGES/nvm_hook.zsh
 
