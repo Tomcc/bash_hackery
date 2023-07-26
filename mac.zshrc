@@ -16,10 +16,6 @@ eval $(thefuck --alias smh)
 
 # ---------------- plugins ----------------
 
-# DIRENV
-export DIRENV_LOG_FORMAT=
-eval "$(direnv hook zsh)"
-
 # Secretive Config
 export SSH_AUTH_SOCK="/Users/tommaso/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
 

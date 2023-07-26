@@ -21,6 +21,10 @@ export HOUDINI_LMINFO_VERBOSE=0
 alias sssh=ssh
 alias ssh="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
+# DIRENV
+export DIRENV_LOG_FORMAT=
+eval "$(direnv hook zsh)"
+
 # look for the packages in this file's directory
 export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
 

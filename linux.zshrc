@@ -10,10 +10,6 @@ eval $(thefuck --alias smh)
 # look for the packages in this file's directory
 export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
 
-# DIRENV
-export DIRENV_LOG_FORMAT=
-eval "$(direnv hook zsh)"
-
 # setup pexp
 source $ZSH_PACKAGES/pexp/pexp_setup.sh
 
