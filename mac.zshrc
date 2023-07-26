@@ -52,6 +52,6 @@ _zsh_autosuggest_strategy_histdb_top() {
 
 ZSH_AUTOSUGGEST_STRATEGY=histdb_top
 
-# fork off into the shareď zshrc in the same folder
+# fork off into the shareď unix zshrc in the same folder
 SCRIPT_PATH="${(%):-%N}"
-source "$(dirname $SCRIPT_PATH)/shared.zshrc"
+source "$(dirname $SCRIPT_PATH)/unix.zshrc"

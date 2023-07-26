@@ -17,21 +17,8 @@ alias less="less -R"
 alias gsuir="git submodule update --init --recursive"
 export HOUDINI_LMINFO_VERBOSE=0
 
-# make ssh stop bothering me about new keys & changed IPs
-alias sssh=ssh
-alias ssh="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-
-# DIRENV
-export DIRENV_LOG_FORMAT=
-eval "$(direnv hook zsh)"
-
 # look for the packages in this file's directory
 export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
-
-# Pyenv initialization # TODO should it be a plugin?
-export PYENV_ROOT="$HOME/.pyenv"
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
 
 # long command notification
 source "$ZSH_PACKAGES/long_command_notification.zsh"
