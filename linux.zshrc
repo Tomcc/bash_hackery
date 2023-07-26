@@ -1,30 +1,16 @@
 
-# Aliases
-alias hou_dpi_low="pexp HOUDINI_UISCALE 100 && echo 'Houdini DPI set to low'"
-alias hou_dpi_hi="pexp HOUDINI_UISCALE 200 && echo 'Houdini DPI set to high'"
-
-# Add sbin to path
-export PATH="/usr/local/sbin:$PATH"
-
-# Speed up cargo
-export CARGO_PROFILE_DEV_SPLIT_DEBUGINFO=unpacked
-export CARGO_PROFILE_TEST_SPLIT_DEBUGINFO=unpacked
-
 # ---------------- normal shell extensions ----------------
 
 eval $(thefuck --alias smh)
 
 # ---------------- plugins ----------------
 
+# look for the packages in this file's directory
+export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
+
 # DIRENV
 export DIRENV_LOG_FORMAT=
 eval "$(direnv hook zsh)"
-
-# Secretive Config
-export SSH_AUTH_SOCK="/Users/tommaso/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
-
-# NVM installation
-source $ZSH_PACKAGES/nvm_hook.zsh
 
 # setup pexp
 source $ZSH_PACKAGES/pexp/pexp_setup.sh
