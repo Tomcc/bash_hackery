@@ -1,3 +1,8 @@
+
+# look for the packages in this file's directory
+export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
+
+
 # Cool prompts with arrows and shit
 PROMPT=$'%K{248}[%*]%k%K{252}%F{248}\ue0b0%f %B%~%b %k%F{252}\ue0b0%f '
 RPROMPT="%?"
@@ -14,7 +19,31 @@ setopt HIST_SAVE_NO_DUPS
 export EDITOR="code"
 
 alias less="less -R"
+
+# git aliases and functions
 alias gsuir="git submodule update --init --recursive"
+alias gcd='cd $(git rev-parse --show-toplevel)'
+
+# # git add commit push
+gacp() {
+    set -e
+    git add .
+    git commit -m "$1"
+    git push
+}
+
+# go to any package directory with cargo, or the root if invoked with no argument
+cgo() {
+    TARGET="$($ZSH_PACKAGES/find_package_path.py $1)"
+
+    # check the error state of find_package_path
+    if [ $? -eq 0 ]; then
+        cd $TARGET
+    else
+        echo "No workspace found"
+    fi
+}
+
 export HOUDINI_LMINFO_VERBOSE=0
 
 # ---------------- normal shell extensions ----------------
@@ -24,9 +53,6 @@ export DIRENV_LOG_FORMAT=
 eval "$(direnv hook zsh)"
 
 # ---------------- plugins ----------------
-
-# look for the packages in this file's directory
-export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
 
 # long command notification
 source "$ZSH_PACKAGES/long_command_notification.zsh"

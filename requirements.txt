@@ -1,0 +1,7 @@
+# for long_command_notification
+winotify
+
+# for find_package_path
+toml
+fuzzywuzzy
+python-Levenshtein
