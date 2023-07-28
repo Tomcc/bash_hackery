@@ -6,9 +6,6 @@ export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
 export MY_BINS="$ZSH_PACKAGES/bin"
 export PATH="$MY_BINS:$PATH"
 
-# Cool prompts with arrows and stuff
-PROMPT=$'%K{248}[%*]%k%K{252}%F{248}\ue0b0%f %B%~%b %k%F{252}\ue0b0%f %?\n  '
-
 # remove dupes from history
 setopt HIST_EXPIRE_DUPS_FIRST
 setopt HIST_IGNORE_DUPS
@@ -19,6 +16,9 @@ setopt HIST_SAVE_NO_DUPS
 
 # various system settings
 export EDITOR="code"
+export HOUDINI_LMINFO_VERBOSE=0
+export DIRENV_LOG_FORMAT=
+export AUTO_NOTIFY_THRESHOLD=30
 
 alias less="less -R"
 
@@ -59,23 +59,42 @@ pcode() {
 
 export HOUDINI_LMINFO_VERBOSE=0
 
-# ---------------- normal shell extensions ----------------
-
-# DIRENV
-export DIRENV_LOG_FORMAT=
 eval "$(direnv hook zsh)"
 
-# ---------------- plugins ----------------
+# ---------------- antigen ----------------
 
 # long command notification
-source "$MY_BINS/long_command_notification.zsh"
+# TODO only use this on Windows where zsh-auto-notify doesn't work
+# source "$MY_BINS/long_command_notification.zsh"
 
-# z directory jumping
-source "$ZSH_PACKAGES/zsh-z/zsh-z.plugin.zsh"
-autoload -U compinit && compinit
+source /usr/local/share/antigen/antigen.zsh
 
-# auto suggestions
-source "$ZSH_PACKAGES/zsh-autosuggestions/zsh-autosuggestions.zsh"
+antigen use oh-my-zsh
 
-# syntax highlighting
-source "$ZSH_PACKAGES/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+antigen bundle zsh-users/zsh-syntax-highlighting
+antigen bundle command-not-found
+antigen bundle zsh-users/zsh-autosuggestions
+antigen bundle command-not-found
+antigen bundle thefuck
+antigen bundle z
+
+# not on windows
+if [[ "$OSTYPE" != "msys" ]]; then
+    antigen bundle "MichaelAquilina/zsh-auto-notify"
+    antigen bundle mattberther/zsh-pyenv
+fi
+
+# only on mac
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    antigen bundle nvm
+    zstyle ':omz:plugins:nvm' autoload yes
+fi
+
+antigen theme romkatv/powerlevel10k
+
+antigen apply
+
+echo "$ZSH_PACKAGES"
+
+# p10k preferences
+source "$ZSH_PACKAGES/p10k.zsh"

@@ -5,19 +5,6 @@
 alias sssh=ssh
 alias ssh="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
-# ---------------- pyenv ----------------
-
-# Pyenv initialization # TODO should it be a plugin?
-export PYENV_ROOT="$HOME/.pyenv"
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-
-
-# ---------------- normal shell extensions ----------------
-
-# THEFUCK
-eval $(thefuck --alias smh)
-
 # --------------- sqlite history 
 
 # look for the packages in this file's directory
@@ -29,7 +16,6 @@ source $ZSH_PACKAGES/pexp/pexp_setup.sh
 # better history database
 export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
 
-HISTDB_TABULATE_CMD=(sed -e $'s/\x1f/\t/g')
 source $ZSH_PACKAGES/zsh-histdb/sqlite-history.zsh
 autoload -Uz add-zsh-hook
 
