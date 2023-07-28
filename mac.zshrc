@@ -10,6 +10,9 @@ export PATH="/usr/local/sbin:$PATH"
 export CARGO_PROFILE_DEV_SPLIT_DEBUGINFO=unpacked
 export CARGO_PROFILE_TEST_SPLIT_DEBUGINFO=unpacked
 
+# fix histdb
+HISTDB_TABULATE_CMD=(sed -e $'s/\x1f/\t/g')
+
 # ---------------- plugins ----------------
 
 # Secretive Config
@@ -17,9 +20,6 @@ export SSH_AUTH_SOCK="/Users/tommaso/Library/Containers/com.maxgoedjen.Secretive
 
 # look for the packages in this file's directory
 export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
-
-# NVM installation
-source $ZSH_PACKAGES/nvm_hook.zsh
 
 # fork off into the shareď unix zshrc in the same folder
 SCRIPT_PATH="${(%):-%N}"
