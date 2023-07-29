@@ -20,17 +20,8 @@ export EDITOR="code"
 
 alias less="less -R"
 
-# git aliases and functions
-alias gsuir="git submodule update --init --recursive"
+# go to the root of any git repo
 alias gcd='cd $(git rev-parse --show-toplevel)'
-
-# # git add commit push
-gacp() {
-    set -e
-    git add .
-    git commit -m "$1"
-    git push
-}
 
 # go to any package directory with cargo, or the root if invoked with no argument
 cgo() {

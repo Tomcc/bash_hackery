@@ -1,0 +1,64 @@
+# This gitconfig file is meant to be included in the global system one
+# for example
+# git config --global include.path '~/.gitconfig'
+
+[filter "lfs"]
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+
+[merge]
+	tool = vscode
+[mergetool "vscode"]
+	cmd = code --wait --new-window $MERGED
+[diff]
+	tool = vscode
+[difftool "vscode"]
+	cmd = code --wait --new-window --diff $LOCAL $REMOTE
+[core]
+	editor = code --wait --new-window
+	preloadindex = true
+	fscache = true
+	pager = diff-so-fancy | less --tabs=4 -RFX
+[user]
+	name = Tommaso Checchi
+	email = tommaso.checchi1@gmail.com
+[rebase]
+	autostash = true
+	instructionFormat = (%an) %s
+	autosquash = true
+[pull]
+	rebase = true
+[push]
+	default = simple
+	autoSetupRemote = true
+[alias]
+	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	reflog = log -g --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	suir = submodule update --init --recursive
+	mt = mergetool
+	acp = !sh git_add_commit_push.sh
+	gconf = config -e --global
+	s = status
+	cp = cherry-pick
+[mergetool]
+	keepBackup = false
+[fetch]
+	prune = true
+[color]
+	ui = true
+[color "diff-highlight"]
+	oldNormal = red bold
+	oldHighlight = red bold 52
+	newNormal = green bold
+	newHighlight = green bold 22
+[color "diff"]
+	meta = 11
+	frag = magenta bold
+	commit = yellow bold
+	old = red bold
+	new = green bold
+	whitespace = red reverse
+[init]
+	defaultBranch = main
