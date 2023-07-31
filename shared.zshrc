@@ -2,10 +2,8 @@
 # look for the packages in this file's directory
 export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
 
-
-# Cool prompts with arrows and shit
-PROMPT=$'%K{248}[%*]%k%K{252}%F{248}\ue0b0%f %B%~%b %k%F{252}\ue0b0%f '
-RPROMPT="%?"
+# Cool prompts with arrows and stuff
+PROMPT=$'%K{248}[%*]%k%K{252}%F{248}\ue0b0%f %B%~%b %k%F{252}\ue0b0%f %?\n  '
 
 # remove dupes from history
 setopt HIST_EXPIRE_DUPS_FIRST
