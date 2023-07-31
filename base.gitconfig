@@ -1,6 +1,6 @@
 # This gitconfig file is meant to be included in the global system one
 # for example
-# git config --global include.path '~/.gitconfig'
+# git config --global include.path ~/dev/bash_hackery/base.gitconfig
 
 [filter "lfs"]
 	process = git-lfs filter-process
