@@ -2,6 +2,10 @@
 # look for the packages in this file's directory
 export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
 
+# add all the binaries to the path
+export MY_BINS="$ZSH_PACKAGES/bin"
+export PATH="$MY_BINS:$PATH"
+
 # Cool prompts with arrows and stuff
 PROMPT=$'%K{248}[%*]%k%K{252}%F{248}\ue0b0%f %B%~%b %k%F{252}\ue0b0%f %?\n  '
 
@@ -23,7 +27,7 @@ alias gcd='cd $(git rev-parse --show-toplevel)'
 
 # go to any package directory with cargo, or the root if invoked with no argument
 cgo() {
-    TARGET="$($ZSH_PACKAGES/find_package_path.py $1)"
+    TARGET="$(find_package_path.py $1)"
 
     # check the error state of find_package_path
     if [ $? -eq 0 ]; then
@@ -44,7 +48,7 @@ eval "$(direnv hook zsh)"
 # ---------------- plugins ----------------
 
 # long command notification
-source "$ZSH_PACKAGES/long_command_notification.zsh"
+source "$MY_BINS/long_command_notification.zsh"
 
 # z directory jumping
 source "$ZSH_PACKAGES/zsh-z/zsh-z.plugin.zsh"
