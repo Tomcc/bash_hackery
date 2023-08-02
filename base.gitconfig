@@ -23,7 +23,6 @@
 	pager = diff-so-fancy | less --tabs=4 -RFX
 [user]
 	name = Tommaso Checchi
-	email = tommaso.checchi1@gmail.com
 [rebase]
 	autostash = true
 	instructionFormat = (%an) %s
