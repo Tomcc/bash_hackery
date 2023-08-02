@@ -10,6 +10,11 @@ SAVEHIST=10000
 SCRIPT_PATH="$(dirname ${(%):-%N})"
 source "$SCRIPT_PATH/shared.zshrc"
 
+# windows replacement for `open`
+function open() {
+  start "$(cygpath -w "$1")"
+}
+
 # Patch direnv to work on windows
 # The issue is that editing PATH will mangle windows paths
 # so all paths need to be passed through cygpath
