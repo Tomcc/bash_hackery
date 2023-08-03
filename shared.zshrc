@@ -26,12 +26,29 @@ alias less="less -R"
 alias gcd='cd $(git rev-parse --show-toplevel)'
 
 # go to any package directory with cargo, or the root if invoked with no argument
-cgo() {
+pgo() {
     TARGET="$(find_package_path.py $1)"
 
     # check the error state of find_package_path
     if [ $? -eq 0 ]; then
         cd $TARGET
+    else
+        echo "No workspace found"
+    fi
+}
+
+# open any package directory with code. Fail if invoked with no argument
+pcode() {
+    if [ -z "$1" ]; then
+        echo "usage: pcode <package name>"
+        return 1
+    fi
+
+    TARGET="$(find_package_path.py $1)"
+
+    # check the error state of find_package_path
+    if [ $? -eq 0 ]; then
+        "$EDITOR" "$TARGET"
     else
         echo "No workspace found"
     fi
