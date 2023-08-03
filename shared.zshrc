@@ -25,6 +25,9 @@ alias less="less -R"
 # go to the root of any git repo
 alias gcd='cd $(git rev-parse --show-toplevel)'
 
+# watch a directory and run tests with cargo nextest
+alias watch_test='cargo watch -- cargo nextest run'
+
 # go to any package directory with cargo, or the root if invoked with no argument
 pgo() {
     TARGET="$(find_package_path.py $1)"
