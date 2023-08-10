@@ -171,4 +171,10 @@ else
     
     # Cool prompts with arrows and stuff without using p10k
     PROMPT=$'%K{248}[%*]%k%K{252}%F{248}\ue0b0%f %B%~%b %k%F{252}\ue0b0%f %?\n  '
+
+    # auto suggestions
+    source "$ZSH_PACKAGES/zsh-autosuggestions/zsh-autosuggestions.zsh"
+
+    # syntax highlighting
+    source "$ZSH_PACKAGES/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
