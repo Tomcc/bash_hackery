@@ -94,7 +94,5 @@ antigen theme romkatv/powerlevel10k
 
 antigen apply
 
-echo "$ZSH_PACKAGES"
-
 # p10k preferences
 source "$ZSH_PACKAGES/p10k.zsh"
