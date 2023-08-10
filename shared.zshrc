@@ -6,17 +6,22 @@ LINUX=0
 USE_HISTDB=0
 USE_ANTIGEN=0
 USE_NVM=0
+USE_PEXP=0
 
-// if linux
+# if linux
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    LINUX=1
+
     USE_ANTIGEN=1
     USE_HISTDB=1
-    LINUX=1
+    USE_PEXP=1
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     MACOS=1
+
     USE_ANTIGEN=1
     USE_HISTDB=1
     USE_NVM=1
+    USE_PEXP=1
 elif [[ "$OSTYPE" == "cygwin" ]]; then
     WINDOWS=1
 elif [[ "$OSTYPE" == "msys" ]]; then
@@ -27,7 +32,7 @@ fi
 
 
 # look for the packages in this file's directory
-export ZSH_PACKAGES=""$(dirname ${(%):-%N})""
+export ZSH_PACKAGES="$(realpath "$(dirname ${(%):-%N})")"
 
 # add all the binaries to the path
 export MY_BINS="$ZSH_PACKAGES/bin"
@@ -44,6 +49,34 @@ if [[ "$USE_HISTDB" == "0" ]]; then
     HISTFILE="$HOME/.zsh_history"
     HISTSIZE=10000
     SAVEHIST=10000
+else
+    source $ZSH_PACKAGES/zsh-histdb/sqlite-history.zsh
+    autoload -Uz add-zsh-hook
+
+    # autocompletion, using the database.
+    # This will find the most frequently issued command issued exactly in this directory, 
+    # or if there are no matches it will find the most frequently issued command in any directory. 
+    # You could use other fields like the hostname to restrict to suggestions on this host, etc.
+
+    _zsh_autosuggest_strategy_histdb_top() {
+        local query="
+            select commands.argv from history
+            left join commands on history.command_id = commands.rowid
+            left join places on history.place_id = places.rowid
+            where commands.argv LIKE '$(sql_escape $1)%'
+            group by commands.argv, places.dir
+            order by places.dir != '$(sql_escape $PWD)', count(*) desc
+            limit 1
+        "
+        suggestion=$(_histdb_query "$query")
+    }
+
+    ZSH_AUTOSUGGEST_STRATEGY=histdb_top
+
+    # mac fixes for histdb
+    if [[ "$MACOS" == "1" ]]; then
+        HISTDB_TABULATE_CMD=(sed -e $'s/\x1f/\t/g')
+    fi
 fi
 
 # remove dupes from history
@@ -54,12 +87,40 @@ setopt HIST_IGNORE_SPACE
 setopt HIST_FIND_NO_DUPS
 setopt HIST_SAVE_NO_DUPS
 
+# ---------------- ssh agent ----------------
+
+# if linux
+if [[ "$LINUX" == "1" ]]; then
+    # start ssh-agent silently
+    eval $(ssh-agent -s) > /dev/null
+elif [[ "$MACOS" == "1" ]]; then
+    # on mac, use secretive
+    export SSH_AUTH_SOCK="/Users/tommaso/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
+fi
+
+# ---------------- pexp ----------------
+
+if [[ "$USE_PEXP" == "1" ]]; then
+    # setup pexp
+    source $ZSH_PACKAGES/pexp/pexp_setup.sh
+fi
+
 # ---------------- exports ----------------
 
 export EDITOR="code"
 export HOUDINI_LMINFO_VERBOSE=0
 export DIRENV_LOG_FORMAT=
 export AUTO_NOTIFY_THRESHOLD=30
+
+# special macos config
+if [[ "$MACOS" == "1" ]]; then
+    # Add sbin to path
+    export PATH="/usr/local/sbin:$PATH"
+
+    # Speed up cargo
+    export CARGO_PROFILE_DEV_SPLIT_DEBUGINFO=unpacked
+    export CARGO_PROFILE_TEST_SPLIT_DEBUGINFO=unpacked
+fi
 
 # ---------------- aliases ----------------
 
@@ -70,6 +131,10 @@ alias gcd='cd $(git rev-parse --show-toplevel)'
 
 # watch a directory and run tests with cargo nextest
 alias watch_test='cargo watch --clear -- cargo nextest run'
+
+# Houdini Aliases
+alias hou_dpi_low="pexp HOUDINI_UISCALE 100 && echo 'Houdini DPI set to low'"
+alias hou_dpi_hi="pexp HOUDINI_UISCALE 200 && echo 'Houdini DPI set to high'"
 
 # go to any package directory with cargo, or the root if invoked with no argument
 pgo() {
@@ -107,7 +172,6 @@ if [[ "$WINDOWS" == "1" ]]; then
     function open() {
         start "$(cygpath -w "$1")"
     }
-
 fi
 
 # ---------------- direnv ----------------
@@ -140,14 +204,13 @@ fi
 
 # check if we use antigen
 if [[ "$USE_ANTIGEN" == "1" ]]; then
-    source /usr/local/share/antigen/antigen.zsh
+    source "$ZSH_PACKAGES/antigen.zsh"
 
     antigen use oh-my-zsh
 
     antigen bundle zsh-users/zsh-syntax-highlighting
     antigen bundle command-not-found
     antigen bundle zsh-users/zsh-autosuggestions
-    antigen bundle command-not-found
     antigen bundle thefuck
     antigen bundle z
     antigen bundle "MichaelAquilina/zsh-auto-notify"
