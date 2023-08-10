@@ -26,7 +26,7 @@ alias less="less -R"
 alias gcd='cd $(git rev-parse --show-toplevel)'
 
 # watch a directory and run tests with cargo nextest
-alias watch_test='cargo watch -- cargo nextest run'
+alias watch_test='cargo watch --clear -- cargo nextest run'
 
 # go to any package directory with cargo, or the root if invoked with no argument
 pgo() {
