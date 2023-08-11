@@ -3,7 +3,6 @@
 WINDOWS=0
 MACOS=0
 LINUX=0
-USE_HISTDB=0
 USE_ANTIGEN=0
 USE_NVM=0
 USE_PEXP=0
@@ -13,13 +12,11 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     LINUX=1
 
     USE_ANTIGEN=1
-    USE_HISTDB=1
     USE_PEXP=1
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     MACOS=1
 
     USE_ANTIGEN=1
-    USE_HISTDB=1
     USE_NVM=1
     USE_PEXP=1
 elif [[ "$OSTYPE" == "cygwin" ]]; then
@@ -29,6 +26,23 @@ elif [[ "$OSTYPE" == "msys" ]]; then
 else
     echo "Unknown OS: $OSTYPE"
 fi
+
+# ---------------- wsl----------------
+
+if [[ "$WSL_DISTRO_NAME" != "" ]]; then
+
+    # MAKE SURE to disable PATH sharing
+    # https://learn.microsoft.com/en-us/windows/wsl/wsl-config#wslconf
+    # [interop]
+    # appendWindowsPath = false
+
+    # Let's add back paths that are actually safe
+
+    # TODO automatically find the Windows user somehow?
+    export PATH="$PATH:/mnt/c/Users/c-tom/AppData/Local/Programs/Microsoft VS Code/bin"
+fi
+
+# ---------------- antigen setup ----------------
 
 if [[ "$USE_ANTIGEN" == "1" ]]; then
     # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
@@ -48,8 +62,8 @@ export PATH="$MY_BINS:$PATH"
 
 # ---------------- history ----------------
 
-# if not using HISTDB, set up history
-if [[ "$USE_HISTDB" == "0" ]]; then
+# if not using ANTIGEN, set up history by hand
+if [[ "$USE_ANTIGEN" == "0" ]]; then
     # append to the history file, don't overwrite it
     setopt -o share_history
 
@@ -57,34 +71,6 @@ if [[ "$USE_HISTDB" == "0" ]]; then
     HISTFILE="$HOME/.zsh_history"
     HISTSIZE=10000
     SAVEHIST=10000
-else
-    source $ZSH_PACKAGES/zsh-histdb/sqlite-history.zsh
-    autoload -Uz add-zsh-hook
-
-    # autocompletion, using the database.
-    # This will find the most frequently issued command issued exactly in this directory, 
-    # or if there are no matches it will find the most frequently issued command in any directory. 
-    # You could use other fields like the hostname to restrict to suggestions on this host, etc.
-
-    _zsh_autosuggest_strategy_histdb_top() {
-        local query="
-            select commands.argv from history
-            left join commands on history.command_id = commands.rowid
-            left join places on history.place_id = places.rowid
-            where commands.argv LIKE '$(sql_escape $1)%'
-            group by commands.argv, places.dir
-            order by places.dir != '$(sql_escape $PWD)', count(*) desc
-            limit 1
-        "
-        suggestion=$(_histdb_query "$query")
-    }
-
-    ZSH_AUTOSUGGEST_STRATEGY=histdb_top
-
-    # mac fixes for histdb
-    if [[ "$MACOS" == "1" ]]; then
-        HISTDB_TABULATE_CMD=(sed -e $'s/\x1f/\t/g')
-    fi
 fi
 
 # remove dupes from history
@@ -220,9 +206,9 @@ if [[ "$USE_ANTIGEN" == "1" ]]; then
     antigen bundle command-not-found
     antigen bundle zsh-users/zsh-autosuggestions
     antigen bundle thefuck
-    antigen bundle z
     antigen bundle "MichaelAquilina/zsh-auto-notify"
     antigen bundle mattberther/zsh-pyenv
+    antigen bundle atuinsh/atuin@main
 
     # nvm isn't always on
     if [[ "$USE_NVM" == "1" ]]; then
