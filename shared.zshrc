@@ -39,7 +39,7 @@ if [[ "$WSL_DISTRO_NAME" != "" ]]; then
     # Let's add back paths that are actually safe
 
     # TODO automatically find the Windows user somehow?
-    export PATH="$PATH:/mnt/c/Users/c-tom/AppData/Local/Programs/Microsoft VS Code/bin"
+    export PATH="$PATH:$(wslpath "$(wslvar USERPROFILE)")/AppData/Local/Programs/Microsoft VS Code/bin"
 fi
 
 # ---------------- antigen setup ----------------
