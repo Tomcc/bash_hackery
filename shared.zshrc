@@ -125,6 +125,7 @@ alias gcd='cd $(git rev-parse --show-toplevel)'
 
 # watch a directory and run tests with cargo nextest
 alias watch_test='cargo watch --clear -- cargo nextest run'
+alias watch_bench='cargo watch --clear -- cargo bench'
 
 # Houdini Aliases
 alias hou_dpi_low="pexp HOUDINI_UISCALE 100 && echo 'Houdini DPI set to low'"
@@ -194,6 +195,10 @@ if [[ "$WINDOWS" == "1" ]]; then
     fi
 fi
 
+# ---------------- atuin config ----------------
+
+export ATUIN_CONFIG_DIR="$ZSH_PACKAGES/atuin_config"
+
 # ---------------- antigen ----------------
 
 # check if we use antigen
@@ -223,6 +228,9 @@ if [[ "$USE_ANTIGEN" == "1" ]]; then
     # p10k preferences
     source "$ZSH_PACKAGES/p10k.zsh"
 else    
+    # atuin
+    eval "$(atuin init zsh)"
+    
     # long command notification
     source "$MY_BINS/long_command_notification.zsh"
     
