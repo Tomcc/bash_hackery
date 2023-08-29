@@ -1,0 +1,55 @@
+{
+    // appearance
+    "workbench.startupEditor": "none",
+    "editor.inlineSuggest.enabled": true,
+    "workbench.colorTheme": "Default Light+",
+    "editor.guides.bracketPairs": "active",
+    "explorer.confirmDragAndDrop": false,
+    "window.newWindowDimensions": "inherit",
+    // git
+    "git.enableSmartCommit": true,
+    "git.confirmSync": false,
+    "git.openRepositoryInParentFolders": "never",
+    // rust
+    "editor.inlayHints.enabled": "off",
+    "rust-analyzer.check.command": "clippy",
+    "rust-analyzer.check.extraArgs": [
+        "--tests"
+    ],
+    "rust-analyzer.cargo.extraEnv": {
+        "CARGO_TARGET_DIR": "target/rust-analyzer",
+    },
+    // autosave 
+    "editor.formatOnSave": true,
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 2000,
+    // terminals
+    "terminal.integrated.profiles.windows": {
+        "zsh": {
+            "path": [
+                "${env:USERPROFILE}\\scoop\\shims\\msys2.cmd",
+            ],
+            "args": [
+                "-no-start",
+                "-defterm",
+                "-use-full-path",
+                "-shell",
+                "zsh"
+            ],
+            "icon": "terminal-cmd"
+        },
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell"
+        },
+        "Command Prompt": {
+            "path": [
+                "${env:windir}\\Sysnative\\cmd.exe",
+                "${env:windir}\\System32\\cmd.exe"
+            ],
+            "args": [],
+            "icon": "terminal-cmd"
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "zsh"
+}
