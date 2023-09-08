@@ -21,6 +21,8 @@
 	preloadindex = true
 	fscache = true
 	pager = diff-so-fancy | less --tabs=4 -RFX
+[advice]
+	detachedHead = false
 [user]
 	name = Tommaso Checchi
 [rebase]
@@ -37,7 +39,7 @@
 	reflog = log -g --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
 	suir = submodule update --init --recursive
 	mt = mergetool
-	acp = !sh git_add_commit_push.sh
+	acp = !bash git_add_commit_push.sh
 	gconf = config -e --global
 	s = status
 	cp = cherry-pick
