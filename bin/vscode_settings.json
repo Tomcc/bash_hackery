@@ -2,10 +2,17 @@
     // appearance
     "workbench.startupEditor": "none",
     "editor.inlineSuggest.enabled": true,
-    "workbench.colorTheme": "Default Light+",
+    "workbench.colorTheme": "Default Light Modern",
+    "workbench.preferredDarkColorTheme": "Monokai",
     "editor.guides.bracketPairs": "active",
+    "editor.bracketPairColorization.enabled": true,
     "explorer.confirmDragAndDrop": false,
     "window.newWindowDimensions": "inherit",
+    "editor.minimap.maxColumn": 100,
+    "editor.rulers": [
+      100
+    ],
+    "terminal.integrated.scrollback": 10000,
     // git
     "git.enableSmartCommit": true,
     "git.confirmSync": false,
@@ -17,7 +24,7 @@
         "--tests"
     ],
     "rust-analyzer.cargo.extraEnv": {
-        "CARGO_TARGET_DIR": "target/rust-analyzer",
+        "CARGO_TARGET_DIR": "target/rust-analyzer"
     },
     // autosave 
     "editor.formatOnSave": true,
@@ -27,7 +34,7 @@
     "terminal.integrated.profiles.windows": {
         "zsh": {
             "path": [
-                "${env:USERPROFILE}\\scoop\\shims\\msys2.cmd",
+                "${env:USERPROFILE}\\scoop\\shims\\msys2.cmd"
             ],
             "args": [
                 "-no-start",
