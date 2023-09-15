@@ -10,13 +10,15 @@
     "window.newWindowDimensions": "inherit",
     "editor.minimap.maxColumn": 100,
     "editor.rulers": [
-      100
+        100
     ],
     "terminal.integrated.scrollback": 10000,
     // git
     "git.enableSmartCommit": true,
     "git.confirmSync": false,
     "git.openRepositoryInParentFolders": "never",
+    "git.decorations.enabled": false,
+    "scm.defaultViewMode": "tree",
     // rust
     "editor.inlayHints.enabled": "off",
     "rust-analyzer.check.command": "clippy",
