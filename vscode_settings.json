@@ -1,60 +1,61 @@
 {
-    // appearance
-    "workbench.startupEditor": "none",
-    "editor.inlineSuggest.enabled": true,
-    "workbench.preferredLightColorTheme": "Default Light Modern",
-    "workbench.preferredDarkColorTheme": "Monokai",
-    "editor.guides.bracketPairs": "active",
-    "editor.bracketPairColorization.enabled": true,
-    "explorer.confirmDragAndDrop": false,
-    "window.newWindowDimensions": "inherit",
-    "editor.minimap.maxColumn": 100,
-    "editor.rulers": [100],
-    "terminal.integrated.scrollback": 10000,
-    "editor.fontSize": 14,
-    // git
-    "git.enableSmartCommit": true,
-    "git.confirmSync": false,
-    "git.openRepositoryInParentFolders": "never",
-    "git.decorations.enabled": false,
-    "scm.defaultViewMode": "tree",
-    // rust
-    "editor.inlayHints.enabled": "off",
-    "rust-analyzer.check.command": "clippy",
-    "rust-analyzer.check.extraArgs": ["--tests"],
-    "rust-analyzer.cargo.extraEnv": {
-      "CARGO_TARGET_DIR": "target/rust-analyzer"
+  // appearance
+  "editor.bracketPairColorization.enabled": true,
+  "editor.fontSize": 14,
+  "editor.guides.bracketPairs": "active",
+  "editor.inlineSuggest.enabled": true,
+  "editor.minimap.maxColumn": 100,
+  "editor.rulers": [100],
+  "explorer.confirmDragAndDrop": false,
+  "terminal.integrated.scrollback": 10000,
+  "window.autoDetectColorScheme": true,
+  "window.newWindowDimensions": "inherit",
+  "workbench.colorTheme": "Default Light Modern",
+  "workbench.preferredDarkColorTheme": "Monokai",
+  "workbench.preferredLightColorTheme": "Default Light Modern",
+  "workbench.startupEditor": "none",
+  // git
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "git.openRepositoryInParentFolders": "never",
+  "git.decorations.enabled": false,
+  "scm.defaultViewMode": "tree",
+  // rust
+  "editor.inlayHints.enabled": "off",
+  "rust-analyzer.check.command": "clippy",
+  "rust-analyzer.check.extraArgs": ["--tests"],
+  "rust-analyzer.cargo.extraEnv": {
+    "CARGO_TARGET_DIR": "target/rust-analyzer"
+  },
+  // autosave
+  "editor.formatOnSave": true,
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 2000,
+  // terminals
+  "terminal.integrated.profiles.windows": {
+    "zsh": {
+      "path": ["${env:USERPROFILE}\\scoop\\shims\\msys2.cmd"],
+      "args": ["-no-start", "-defterm", "-use-full-path", "-shell", "zsh"],
+      "icon": "terminal-cmd"
     },
-    // autosave
-    "editor.formatOnSave": true,
-    "files.autoSave": "afterDelay",
-    "files.autoSaveDelay": 2000,
-    // terminals
-    "terminal.integrated.profiles.windows": {
-      "zsh": {
-        "path": ["${env:USERPROFILE}\\scoop\\shims\\msys2.cmd"],
-        "args": ["-no-start", "-defterm", "-use-full-path", "-shell", "zsh"],
-        "icon": "terminal-cmd"
-      },
-      "PowerShell": {
-        "source": "PowerShell",
-        "icon": "terminal-powershell"
-      },
-      "Command Prompt": {
-        "path": [
-          "${env:windir}\\Sysnative\\cmd.exe",
-          "${env:windir}\\System32\\cmd.exe"
-        ],
-        "args": [],
-        "icon": "terminal-cmd"
-      }
+    "PowerShell": {
+      "source": "PowerShell",
+      "icon": "terminal-powershell"
     },
-    "terminal.integrated.defaultProfile.windows": "zsh",
-    "github.copilot.enable": {
-      "*": true,
-      "plaintext": true,
-      "markdown": true,
-      "scminput": false
+    "Command Prompt": {
+      "path": [
+        "${env:windir}\\Sysnative\\cmd.exe",
+        "${env:windir}\\System32\\cmd.exe"
+      ],
+      "args": [],
+      "icon": "terminal-cmd"
     }
-  }
-  
+  },
+  "terminal.integrated.defaultProfile.windows": "zsh",
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": true,
+    "markdown": true,
+    "scminput": false
+  },
+}
