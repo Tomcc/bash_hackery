@@ -9,9 +9,21 @@ fi
 set -euo pipefail
 
 # make sure that there are no outstanding git changes
+STASHED=false
 if [[ -n $(git status --porcelain) ]]; then
-  echo "There are outstanding changes in the working directory. Please commit or stash them before running this script."
-  exit 1
+  echo "There are outstanding changes in the working directory. Do you want to stash all? Y/n"
+  
+  read -r response
+
+  if [[ $response == "Y" ]] || [[ $response == "y" ]] || [[ -z $response ]]; then
+    # stash the changes, including new files
+    git stash --include-untracked
+    STASHED=true
+  else
+    echo "Please commit or stash your changes before running this script."
+    exit 1
+  fi
+
 fi
 
 # make sure that the current branch is not the main branch
@@ -41,3 +53,8 @@ git push origin main
 
 # switch back to the original branch
 git switch -
+
+# unstash the changes if we stashed them
+if [[ $STASHED == true ]]; then
+  git stash pop
+fi
