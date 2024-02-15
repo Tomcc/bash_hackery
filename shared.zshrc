@@ -195,6 +195,10 @@ if [[ "$WINDOWS" == "1" ]]; then
     fi
 fi
 
+# ---------------- zoxide ----------------
+
+eval "$(zoxide init --cmd cd zsh)"
+
 # ---------------- atuin config ----------------
 
 export ATUIN_CONFIG_DIR="$ZSH_PACKAGES/atuin_config"
