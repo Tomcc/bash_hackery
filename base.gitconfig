@@ -28,6 +28,8 @@
 	detachedHead = false
 [user]
 	name = Tommaso Checchi
+[fetch]
+	parallel = 0
 [rebase]
 	autostash = true
 	instructionFormat = (%an) %s
@@ -37,6 +39,8 @@
 [push]
 	default = simple
 	autoSetupRemote = true
+[submodule]
+	recurse = true
 [alias]
 	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
 	reflog = log -g --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
