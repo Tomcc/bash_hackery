@@ -1,2 +1,3 @@
 .envrc
 *.zwc
+.DS_Store
