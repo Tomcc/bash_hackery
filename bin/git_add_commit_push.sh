@@ -1,12 +1,14 @@
 #!/bin/bash
 
-git add --all || exit 1
+set -euo pipefail
+
+git add --all
 
 if [ ! -z "$1" ] ; then
-    git commit -m "$1" --no-status || exit 1
+    git commit -m "$1" --no-status
 else
-    git commit --no-status || exit 1
+    git commit --no-status
 fi
 
-git push --force-with-lease || exit 1
+git push --force-with-lease
 
