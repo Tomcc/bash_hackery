@@ -101,6 +101,11 @@ fi
 
 # ---------------- exports ----------------
 
+eval "$(gh copilot alias -- zsh)"
+alias ai="ghcs"
+
+# ---------------- Copilot ----------------
+
 export EDITOR="code"
 export HOUDINI_LMINFO_VERBOSE=0
 export DIRENV_LOG_FORMAT=
