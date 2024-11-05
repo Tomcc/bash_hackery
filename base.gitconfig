@@ -9,7 +9,7 @@
 	smudge = git-lfs smudge -- %f
 
 [merge]
-	tool = vscode
+	tool = unityyamlmerge
 [mergetool "vscode"]
 	cmd = code --wait --new-window $MERGED
 [mergetool "unityyamlmerge"]
