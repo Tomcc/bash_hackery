@@ -10,13 +10,14 @@
 
 [merge]
 	tool = unityyamlmerge
-[mergetool "vscode"]
-	keepBackup = false
-	cmd = code --wait --new-window $MERGED
 [mergetool "unityyamlmerge"]
     trustExitCode = false
 	keepBackup = false
-    cmd = "/Applications/Unity/Hub/Editor/2023.2.19f1/Unity.app/Contents/Tools/UnityYAMLMerge" merge -p "$BASE" "$REMOTE" "$LOCAL" "$MERGED"
+	# NOTE: this requires the UnityYAMLMerge tool to be installed and available in the PATH
+    cmd = UnityYAMLMerge merge -p "$BASE" "$REMOTE" "$LOCAL" "$MERGED"
+[mergetool "vscode"]
+	keepBackup = false
+	cmd = code --wait --new-window $MERGED
 [diff]
 	tool = vscode
 [difftool "vscode"]
