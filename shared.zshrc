@@ -102,7 +102,6 @@ fi
 # ---------------- exports ----------------
 
 eval "$(gh copilot alias -- zsh)"
-alias ai="ghcs"
 
 # ---------------- Copilot ----------------
 
@@ -172,6 +171,9 @@ if [[ "$WINDOWS" == "1" ]]; then
     function open() {
         start "$(cygpath -w "$1")"
     }
+else 
+    # Use python from uv
+    export PATH="/Users/tommasochecchi/.local/bin:$PATH"
 fi
 
 # ---------------- direnv ----------------
@@ -221,7 +223,6 @@ if [[ "$USE_ANTIGEN" == "1" ]]; then
     antigen bundle zsh-users/zsh-autosuggestions
     antigen bundle thefuck
     antigen bundle "MichaelAquilina/zsh-auto-notify"
-    antigen bundle mattberther/zsh-pyenv
     antigen bundle atuinsh/atuin@main
 
     # nvm isn't always on
