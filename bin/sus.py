@@ -45,7 +45,23 @@ MATTERMOST_ID_TO_NAME_LOOKUP = {
     'js9fg4yf1iyx3qkdgercaiawwr': 'Mrmo Tarius',
     '3qe87h3irt8xdm3yypkjx8z5bo': 'Rebecca Power',
     'xgjn141paiyfu83bg3s8nq9suw': 'Tristan',
-    'xrzquxho3fgdfyd6arpz3kaxia': 'RyanTylerRae'
+    'xrzquxho3fgdfyd6arpz3kaxia': 'RyanTylerRae',
+    '58knsrd7k3dumgsdtp41cptx1w': 'Unknown???',
+}
+
+HOURS_PER_WEEK = {
+    'Coleman Andersen': 40,
+    'Tommaso Checchi': 40,
+    'RyanTylerRae': 40,
+    'dane.curbow': 30,
+    'Dominique': 30,
+    'Ethan.Lennaman': 30,
+    'Flaminia': 30,
+    'Rebecca Power': 30,
+    'Tristan': 30,
+    'Lukas Raymond': 10,
+    'Mrmo Tarius': 10,
+    'Unknown???': 1,
 }
 
 MATTERMOST_DB_USER = "mmuser"
@@ -145,7 +161,11 @@ def get_cloudwatch_active_hours(days_to_check, dev_id_to_name_mapping):
 def get_mattermost_active_hours(days_to_check, mm_id_to_name_mapping):
     """
     Fetches active hours for users from Mattermost by running a read-only SQL query via AWS SSM.
+    Compresses the output with gzip and decompresses it locally.
     """
+    import gzip
+    import io
+
     print("\nFetching activity from Mattermost via AWS SSM...")
     active_hours_by_author = defaultdict(set)
     instance_id = os.environ.get(MATTERMOST_INSTANCE_ENV)
@@ -166,7 +186,18 @@ def get_mattermost_active_hours(days_to_check, mm_id_to_name_mapping):
         export PGUSER="{MATTERMOST_DB_USER}"
         export PGDATABASE="{MATTERMOST_DB_NAME}"
         export PGHOST="localhost"
-        psql -t -A -c "SELECT userid, createat FROM Posts WHERE createat > (extract(epoch from now() - interval '{days_to_check} days') * 1000);"
+        psql -At -F ',' -c "COPY (
+                /* unique (userid, hour) buckets, newest first */
+                SELECT  userid,
+                        date_trunc('hour', to_timestamp(createat/1000)) AS hour_ts
+                FROM    posts
+                WHERE   createat > (extract(epoch from now() - interval '{days_to_check} days') * 1000)
+                GROUP BY userid, hour_ts               -- removes duplicates
+                ORDER BY hour_ts DESC                  -- newest rows first
+            ) TO STDOUT WITH (
+                FORMAT csv,
+                DELIMITER '|'
+            )" | gzip -c | base64
     """).splitlines()
 
     try:
@@ -195,19 +226,30 @@ def get_mattermost_active_hours(days_to_check, mm_id_to_name_mapping):
             print(f"Mattermost SSM command failed: {json.dumps(output, indent=2)}")
             return active_hours_by_author
 
-        # Output is lines: user_id|create_at
-        for line in output['StandardOutputContent'].splitlines():
+        # Decompress the base64-encoded gzipped output
+        import base64, gzip, io
+        try:
+            b64_bytes = output['StandardOutputContent'].encode('utf-8', errors='ignore')
+            gzipped_bytes = base64.b64decode(b64_bytes)
+            with gzip.GzipFile(fileobj=io.BytesIO(gzipped_bytes)) as gz:
+                decompressed = gz.read().decode('utf-8', errors='ignore')
+        except Exception as e:
+            print(f"Error decompressing Mattermost output: {e}")
+            return active_hours_by_author
+
+        # Output is lines: user_id|hour_ts
+        for line in decompressed.splitlines():
             line = line.strip()
             if not line or '|' not in line:
                 continue
-            user_id, create_at = line.split('|', 1)
+            user_id, hour_ts = line.split('|', 1)
             if user_id not in mm_id_to_name_mapping:
                 print(f"Error: Mattermost user_id '{user_id}' not found in MATTERMOST_ID_TO_NAME_LOOKUP. Exiting.")
                 exit(1)
             author = mm_id_to_name_mapping[user_id]
             try:
-                ts = int(create_at)
-                dt = datetime.fromtimestamp(ts / 1000, tz=timezone.utc)
+                # hour_ts is like '2024-06-13 14:00:00+00'
+                dt = datetime.fromisoformat(hour_ts)
                 hour_start = make_hour_id(dt)
                 active_hours_by_author[author].add(hour_start)
             except Exception:
@@ -264,6 +306,7 @@ def analyze_all_sources_activity(repo_path, days_to_check, only=None):
     """
     Aggregates active hours from Git, CloudWatch, and Mattermost.
     If 'only' is set, only that source is used.
+    Prints, for each author: active hours, expected hours, and percent of expected.
     """
     author_active_hours = defaultdict(set)
 
@@ -289,7 +332,7 @@ def analyze_all_sources_activity(repo_path, days_to_check, only=None):
         print("No activity to display.")
         return
 
-    print("\n--- Author Activity Histogram (Unique Hours) ---")
+    print("\n--- Author Activity Histogram (Unique Hours in {} days) ---".format(days_to_check))
     sorted_authors = sorted(
         author_active_hours.keys(),
         key=lambda author: (len(author_active_hours[author]), author),
@@ -298,7 +341,12 @@ def analyze_all_sources_activity(repo_path, days_to_check, only=None):
     for author in sorted_authors:
         hours_set = author_active_hours[author]
         num_active_hours = len(hours_set)
-        print(f"{author}: {num_active_hours} active hour(s)")
+        # Calculate expected hours
+        hours_per_week = HOURS_PER_WEEK.get(author, 40)
+        hours_per_day = hours_per_week / 7
+        expected_hours = hours_per_day * days_to_check
+        percent = (num_active_hours / expected_hours * 100) if expected_hours > 0 else 0
+        print(f"{author}: {num_active_hours} active hour(s) / {expected_hours:.1f} expected ({percent:.0f}%)")
         # To see the specific hours:
         # print(f"  Active hours: {[dt.isoformat() for dt in sorted(hours_set)]}")
 
