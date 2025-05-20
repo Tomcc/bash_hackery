@@ -42,6 +42,12 @@ MATTERMOST_DB_SOCKET = "/var/lib/postgresql"  # Default for omnibus, adjust if n
 MATTERMOST_INSTANCE_ENV = "MATTERMOST_INSTANCE"
 # --- End Configuration ---
 
+def make_hour_id(dt):
+    """
+    Returns a UTC datetime at the start of the hour for the given datetime.
+    """
+    return dt.astimezone(timezone.utc).replace(minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
+
 def get_cloudwatch_active_hours(days_to_check, dev_id_to_name_mapping):
     """
     Fetches active hours for developers from AWS CloudWatch metrics.
@@ -100,6 +106,7 @@ def get_cloudwatch_active_hours(days_to_check, dev_id_to_name_mapping):
             return active_hours_by_author
 
         all_metric_data_results = []
+        # get_metric_data can accept up to 500 queries per request (AWS API limit)
         for i in range(0, len(metric_data_queries), 500):
             batch_queries = metric_data_queries[i:i+500]
             response = cloudwatch.get_metric_data(
@@ -116,7 +123,8 @@ def get_cloudwatch_active_hours(days_to_check, dev_id_to_name_mapping):
                 continue
             for timestamp, value in zip(result['Timestamps'], result['Values']):
                 if value > 0:
-                    active_hours_by_author[author].add(timestamp.hour)
+                    hour_start = make_hour_id(timestamp)
+                    active_hours_by_author[author].add(hour_start)
     except ClientError as e:
         print(f"Error during CloudWatch operation: {e}. Some CloudWatch data might be missing.")
     except Exception as e:
@@ -186,7 +194,8 @@ def get_mattermost_active_hours(days_to_check, mm_id_to_name_mapping):
             try:
                 ts = int(create_at)
                 dt = datetime.fromtimestamp(ts / 1000, tz=timezone.utc)
-                active_hours_by_author[author].add(dt.hour)
+                hour_start = make_hour_id(dt)
+                active_hours_by_author[author].add(hour_start)
             except Exception:
                 continue
 
@@ -225,11 +234,15 @@ def get_git_active_hours(repo_path, days_to_check):
     for commit in repo.iter_commits(all=True, since=since_date.isoformat()):
         commit_count += 1
         author_name = commit.author.name
-        commit_time = commit.committed_datetime
-        commit_hour = commit_time.hour
-        previous_hour = (commit_hour - 1 + 24) % 24
-        active_hours_by_author[author_name].add(commit_hour)
-        active_hours_by_author[author_name].add(previous_hour)
+        commit_time = commit.committed_datetime.astimezone(timezone.utc)
+
+        # Write down this hour as an absolute timestamp
+        hour_start = make_hour_id(commit_time)
+        active_hours_by_author[author_name].add(hour_start)
+
+        # "credit" the previous hour as well
+        prev_hour_start = make_hour_id(commit_time - timedelta(hours=1))
+        active_hours_by_author[author_name].add(prev_hour_start)
     print(f"Found {commit_count} commits.")
     return active_hours_by_author
 
@@ -273,7 +286,7 @@ def analyze_all_sources_activity(repo_path, days_to_check, only=None):
         num_active_hours = len(hours_set)
         print(f"{author}: {num_active_hours} active hour(s)")
         # To see the specific hours:
-        # print(f"  Active hours: {sorted(list(hours_set))}")
+        # print(f"  Active hours: {[dt.isoformat() for dt in sorted(hours_set)]}")
 
 
 if __name__ == "__main__":
