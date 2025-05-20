@@ -15,6 +15,8 @@ from collections import defaultdict
 import os
 import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
+import json
+import time
 
 # --- Configuration for CloudWatch ---
 DEV_ID_TO_NAME_LOOKUP = {
@@ -28,6 +30,16 @@ DEV_ID_TO_NAME_LOOKUP = {
 CLOUDWATCH_METRIC_NAMESPACE = "ProxyMetrics"
 CLOUDWATCH_METRIC_NAME = "dev_requests"
 CLOUDWATCH_USER_DIMENSION = "user"
+# --- End Configuration ---
+
+# --- Configuration for Mattermost ---
+MATTERMOST_ID_TO_NAME_LOOKUP = {
+    # 'mattermost_user_id': 'Real Name',
+}
+MATTERMOST_DB_USER = "mmuser"
+MATTERMOST_DB_NAME = "mattermost"
+MATTERMOST_DB_SOCKET = "/var/lib/postgresql"  # Default for omnibus, adjust if needed
+MATTERMOST_INSTANCE_ENV = "MATTERMOST_INSTANCE"
 # --- End Configuration ---
 
 def get_cloudwatch_active_hours(days_to_check, dev_id_to_name_mapping):
@@ -111,19 +123,90 @@ def get_cloudwatch_active_hours(days_to_check, dev_id_to_name_mapping):
         print(f"An unexpected error occurred during CloudWatch processing: {e}")
     return active_hours_by_author
 
-def analyze_commit_activity(repo_path, days_to_check):
+def get_mattermost_active_hours(days_to_check, mm_id_to_name_mapping):
     """
-    Analyzes commit activity in a Git repository, buckets commits by author and hour,
-    and prints a histogram of active hours.
+    Fetches active hours for users from Mattermost by running a read-only SQL query via AWS SSM.
     """
+    print("\nFetching activity from Mattermost via AWS SSM...")
+    active_hours_by_author = defaultdict(set)
+    instance_id = os.environ.get(MATTERMOST_INSTANCE_ENV)
+    if not instance_id:
+        print(f"Error: MATTERMOST_INSTANCE env var not set. Skipping Mattermost analysis.")
+        return active_hours_by_author
+
+    # Query: select user_id, create_at from Posts where create_at > (now() - interval 'N days')
+    # create_at is in milliseconds since epoch
+    sql = (
+        f'psql -U {MATTERMOST_DB_USER} -d {MATTERMOST_DB_NAME} -t -A -c '
+        f'"SELECT user_id, create_at FROM Posts WHERE create_at > '
+        f'(extract(epoch from now() - interval \'{days_to_check} days\') * 1000);"'
+    )
+    ssm_command = [
+        "sudo", "-u", MATTERMOST_DB_USER, "bash", "-c", sql
+    ]
+    # But omnibus runs as root, so just run as root
+    ssm_command = sql
+
+    try:
+        ssm = boto3.client('ssm')
+        response = ssm.send_command(
+            InstanceIds=[instance_id],
+            DocumentName="AWS-RunShellScript",
+            Parameters={'commands': [ssm_command]},
+            TimeoutSeconds=60,
+        )
+        command_id = response['Command']['CommandId']
+        # Wait for command to finish
+        for _ in range(30):
+            time.sleep(2)
+            output = ssm.get_command_invocation(
+                CommandId=command_id,
+                InstanceId=instance_id,
+            )
+            if output['Status'] in ('Success', 'Failed', 'Cancelled', 'TimedOut'):
+                break
+        else:
+            print("Mattermost SSM command timed out.")
+            return active_hours_by_author
+
+        if output['Status'] != 'Success':
+            print(f"Mattermost SSM command failed: {output['Status']}")
+            return active_hours_by_author
+
+        # Output is lines: user_id|create_at
+        for line in output['StandardOutputContent'].splitlines():
+            line = line.strip()
+            if not line or '|' not in line:
+                continue
+            user_id, create_at = line.split('|', 1)
+            if user_id not in mm_id_to_name_mapping:
+                print(f"Error: Mattermost user_id '{user_id}' not found in MATTERMOST_ID_TO_NAME_LOOKUP. Exiting.")
+                exit(1)
+            author = mm_id_to_name_mapping[user_id]
+            try:
+                ts = int(create_at)
+                dt = datetime.fromtimestamp(ts / 1000, tz=timezone.utc)
+                active_hours_by_author[author].add(dt.hour)
+            except Exception:
+                continue
+
+    except Exception as e:
+        print(f"Error fetching Mattermost activity: {e}")
+    return active_hours_by_author
+
+def get_git_active_hours(repo_path, days_to_check):
+    """
+    Fetches active hours for authors from Git commits.
+    """
+    active_hours_by_author = defaultdict(set)
     try:
         repo = git.Repo(repo_path)
     except git.exc.InvalidGitRepositoryError:
         print(f"Error: '{repo_path}' is not a valid Git repository.")
-        return
+        return active_hours_by_author
     except git.exc.NoSuchPathError:
         print(f"Error: Repository path '{repo_path}' does not exist.")
-        return
+        return active_hours_by_author
 
     print(f"Analyzing commits from the last {days_to_check} days in '{os.path.abspath(repo_path)}'...")
 
@@ -135,72 +218,72 @@ def analyze_commit_activity(repo_path, days_to_check):
             remote.fetch(prune=True)
         except git.exc.GitCommandError as e:
             print(f"Error fetching from remote '{remote.name}': {e}")
-            # Decide if you want to continue or exit if a fetch fails
-            # For now, we'll print the error and continue
     print("Fetch complete.")
 
-    # Calculate the date to look back to
     since_date = datetime.now(timezone.utc) - timedelta(days=days_to_check)
-
-    author_active_hours = defaultdict(set)
-
-    # --- Fetch and merge CloudWatch activity ---
-    cloudwatch_activity = get_cloudwatch_active_hours(days_to_check, DEV_ID_TO_NAME_LOOKUP)
-    for author, hours in cloudwatch_activity.items():
-        author_active_hours[author].update(hours)
-    print(f"Merged CloudWatch activity for {len(cloudwatch_activity)} authors.")
-    # --- End CloudWatch integration ---
-
     commit_count = 0
-    # Iterate over commits from all branches (local and remote-tracking)
     for commit in repo.iter_commits(all=True, since=since_date.isoformat()):
         commit_count += 1
         author_name = commit.author.name
-        # committed_datetime is timezone-aware (usually UTC)
         commit_time = commit.committed_datetime
-
         commit_hour = commit_time.hour
-        # If someone committed in an hour, also count the previous hour
         previous_hour = (commit_hour - 1 + 24) % 24
+        active_hours_by_author[author_name].add(commit_hour)
+        active_hours_by_author[author_name].add(previous_hour)
+    print(f"Found {commit_count} commits.")
+    return active_hours_by_author
 
-        author_active_hours[author_name].add(commit_hour)
-        author_active_hours[author_name].add(previous_hour)
+def analyze_all_sources_activity(repo_path, days_to_check, only=None):
+    """
+    Aggregates active hours from Git, CloudWatch, and Mattermost.
+    If 'only' is set, only that source is used.
+    """
+    author_active_hours = defaultdict(set)
 
-    if commit_count == 0:
-        print(f"No commits found in the last {days_to_check} days.")
-        return
-    
-    print(f"\nFound {commit_count} commits.")
-    print("\n--- Author Activity Histogram (Unique Hours) ---")
+    if only is None or only == "git":
+        git_activity = get_git_active_hours(repo_path, days_to_check)
+        for author, hours in git_activity.items():
+            author_active_hours[author].update(hours)
+        print(f"Merged Git activity for {len(git_activity)} authors.")
+
+    if only is None or only == "aws":
+        cloudwatch_activity = get_cloudwatch_active_hours(days_to_check, DEV_ID_TO_NAME_LOOKUP)
+        for author, hours in cloudwatch_activity.items():
+            author_active_hours[author].update(hours)
+        print(f"Merged CloudWatch activity for {len(cloudwatch_activity)} authors.")
+
+    if only is None or only == "mattermost":
+        mattermost_activity = get_mattermost_active_hours(days_to_check, MATTERMOST_ID_TO_NAME_LOOKUP)
+        for author, hours in mattermost_activity.items():
+            author_active_hours[author].update(hours)
+        print(f"Merged Mattermost activity for {len(mattermost_activity)} authors.")
 
     if not author_active_hours:
         print("No activity to display.")
         return
 
-    # Sort authors by the number of active hours (descending)
-    # then by name (ascending) as a secondary sort key for tie-breaking.
+    print("\n--- Author Activity Histogram (Unique Hours) ---")
     sorted_authors = sorted(
         author_active_hours.keys(),
         key=lambda author: (len(author_active_hours[author]), author),
         reverse=True
     )
-
     for author in sorted_authors:
         hours_set = author_active_hours[author]
         num_active_hours = len(hours_set)
-        # histogram_bar = '*' * num_active_hours # Removed
-        print(f"{author}: {num_active_hours} active hour(s)") # Removed histogram_bar
+        print(f"{author}: {num_active_hours} active hour(s)")
         # To see the specific hours:
         # print(f"  Active hours: {sorted(list(hours_set))}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Analyze Git commit activity by author and hour.",
+        description="Analyze developer activity by author and hour from Git, AWS CloudWatch, and Mattermost.",
         formatter_class=argparse.RawTextHelpFormatter,
         epilog="""
 Example usage:
-  python your_script_name.py /path/to/your/repo 30
+  python sus.py /path/to/your/repo 30
+  python sus.py /path/to/your/repo 30 --only git
 
 This script will output a list of authors and a simple histogram
 representing the number of unique hours they were 'active' (commit hour + previous hour).
@@ -214,7 +297,12 @@ It is NOT a measure of performance or effort.
     parser.add_argument(
         "days",
         type=int,
-        help="Number of days into the past to check for commits."
+        help="Number of days into the past to check for activity."
+    )
+    parser.add_argument(
+        "--only",
+        choices=["git", "aws", "mattermost"],
+        help="Only use the specified source (git, aws (cloudwatch), or mattermost)."
     )
 
     args = parser.parse_args()
@@ -222,4 +310,4 @@ It is NOT a measure of performance or effort.
     if args.days <= 0:
         print("Error: Number of days must be a positive integer.")
     else:
-        analyze_commit_activity(args.repo_path, args.days)
+        analyze_all_sources_activity(args.repo_path, args.days, only=args.only)
