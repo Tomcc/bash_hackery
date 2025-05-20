@@ -17,6 +17,7 @@ import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
 import json
 import time
+import textwrap
 
 # --- Configuration for CloudWatch ---
 DEV_ID_TO_NAME_LOOKUP = {
@@ -34,12 +35,22 @@ CLOUDWATCH_USER_DIMENSION = "user"
 
 # --- Configuration for Mattermost ---
 MATTERMOST_ID_TO_NAME_LOOKUP = {
-    # 'mattermost_user_id': 'Real Name',
+    '5fw3511ropywtkn8kj77pafkkh': 'Coleman Andersen',
+    'gbw3fihcjifqpmwf6t7w3i7wgy': 'Tommaso Checchi',
+    '7o7yzo9ng7b4mju5g81tzeeaah': 'dane.curbow',
+    'cpwkoemowjye9c1hk81bjnsemc': 'Dominique',
+    'tru915ttzbyyikahow9rjeqzir': 'Ethan.Lennaman',
+    'qfk8wi1dh3gu8yigfy4cnfr5ih': 'Flaminia',
+    'ez9cd8isufyq7mzn3kkwz6bgsy': 'Lukas Raymond',
+    'js9fg4yf1iyx3qkdgercaiawwr': 'Mrmo Tarius',
+    '3qe87h3irt8xdm3yypkjx8z5bo': 'Rebecca Power',
+    'xgjn141paiyfu83bg3s8nq9suw': 'Tristan',
+    'xrzquxho3fgdfyd6arpz3kaxia': 'RyanTylerRae'
 }
+
 MATTERMOST_DB_USER = "mmuser"
 MATTERMOST_DB_NAME = "mattermost"
-MATTERMOST_DB_SOCKET = "/var/lib/postgresql"  # Default for omnibus, adjust if needed
-MATTERMOST_INSTANCE_ENV = "MATTERMOST_INSTANCE"
+MATTERMOST_INSTANCE_ENV = "MATTERMOST_INSTANCE_ID"
 # --- End Configuration ---
 
 def make_hour_id(dt):
@@ -142,25 +153,28 @@ def get_mattermost_active_hours(days_to_check, mm_id_to_name_mapping):
         print(f"Error: MATTERMOST_INSTANCE env var not set. Skipping Mattermost analysis.")
         return active_hours_by_author
 
-    # Query: select user_id, create_at from Posts where create_at > (now() - interval 'N days')
-    # create_at is in milliseconds since epoch
-    sql = (
-        f'psql -U {MATTERMOST_DB_USER} -d {MATTERMOST_DB_NAME} -t -A -c '
-        f'"SELECT user_id, create_at FROM Posts WHERE create_at > '
-        f'(extract(epoch from now() - interval \'{days_to_check} days\') * 1000);"'
-    )
-    ssm_command = [
-        "sudo", "-u", MATTERMOST_DB_USER, "bash", "-c", sql
-    ]
-    # But omnibus runs as root, so just run as root
-    ssm_command = sql
+    print(f"Using Mattermost instance id: {instance_id!r}")
+
+    db_password = os.environ.get("MATTERMOST_DB_PASSWORD")
+    if not db_password:
+        print("Error: MATTERMOST_DB_PASSWORD env var not set. Skipping Mattermost analysis.")
+        return active_hours_by_author
+
+    # Compose the bash script for SSM
+    commands = textwrap.dedent(f"""\
+        export PGPASSWORD="{db_password}"
+        export PGUSER="{MATTERMOST_DB_USER}"
+        export PGDATABASE="{MATTERMOST_DB_NAME}"
+        export PGHOST="localhost"
+        psql -t -A -c "SELECT userid, createat FROM Posts WHERE createat > (extract(epoch from now() - interval '{days_to_check} days') * 1000);"
+    """).splitlines()
 
     try:
         ssm = boto3.client('ssm')
         response = ssm.send_command(
             InstanceIds=[instance_id],
             DocumentName="AWS-RunShellScript",
-            Parameters={'commands': [ssm_command]},
+            Parameters={'commands': commands},
             TimeoutSeconds=60,
         )
         command_id = response['Command']['CommandId']
@@ -178,7 +192,7 @@ def get_mattermost_active_hours(days_to_check, mm_id_to_name_mapping):
             return active_hours_by_author
 
         if output['Status'] != 'Success':
-            print(f"Mattermost SSM command failed: {output['Status']}")
+            print(f"Mattermost SSM command failed: {json.dumps(output, indent=2)}")
             return active_hours_by_author
 
         # Output is lines: user_id|create_at
