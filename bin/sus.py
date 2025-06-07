@@ -26,6 +26,11 @@ DEV_ID_TO_NAME_LOOKUP = {
     'dis-186355113726705664': 'RyanTylerRae',
     'dis-554872815451373571': 'Ethan.Lennaman',
     'dis-232400772590075904': 'dane.curbow',    
+    'dis-257766574272937985': 'Dominique',
+    'dis-297525955381952512': 'Lukas Raymond',
+    'dis-716162001864228915': 'Rebecca Power',
+    'dis-121657670800375808': 'Flaminia',
+    'dis-1291176103813054536': 'Tristan',
 }
 
 CLOUDWATCH_METRIC_NAMESPACE = "ProxyMetrics"
@@ -53,9 +58,9 @@ HOURS_PER_WEEK = {
     'Coleman Andersen': 40,
     'Tommaso Checchi': 40,
     'RyanTylerRae': 40,
+    'Ethan.Lennaman': 40,
     'dane.curbow': 30,
     'Dominique': 30,
-    'Ethan.Lennaman': 30,
     'Flaminia': 30,
     'Rebecca Power': 30,
     'Tristan': 30,
