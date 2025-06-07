@@ -9,15 +9,10 @@
 	smudge = git-lfs smudge -- %f
 
 [merge]
-	tool = unityyamlmerge
-[mergetool "unityyamlmerge"]
-    trustExitCode = false
-	keepBackup = false
-	# NOTE: this requires the UnityYAMLMerge tool to be installed and available in the PATH
-    cmd = UnityYAMLMerge merge -p "$BASE" "$REMOTE" "$LOCAL" "$MERGED"
+	tool = vscode
 [mergetool "vscode"]
 	keepBackup = false
-	cmd = code --wait --new-window $MERGED
+	cmd = code --wait --merge $REMOTE $LOCAL $BASE $MERGED
 [diff]
 	tool = vscode
 [difftool "vscode"]
