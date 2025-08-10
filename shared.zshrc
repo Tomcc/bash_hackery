@@ -135,6 +135,9 @@ alias watch_bench='cargo watch --clear -- cargo bench'
 alias hou_dpi_low="pexp HOUDINI_UISCALE 100 && echo 'Houdini DPI set to low'"
 alias hou_dpi_hi="pexp HOUDINI_UISCALE 200 && echo 'Houdini DPI set to high'"
 
+# Robotopia aliases
+alias hammerbot="cargo run --release -p hammerbot -- "
+
 # go to any package directory with cargo, or the root if invoked with no argument
 pgo() {
     TARGET="$(find_package_path.py $1)"
