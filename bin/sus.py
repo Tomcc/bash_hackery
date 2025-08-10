@@ -28,7 +28,7 @@ DEV_ID_TO_NAME_LOOKUP = {
     'dis-232400772590075904': 'dane.curbow',    
     'dis-257766574272937985': 'Dominique',
     'dis-297525955381952512': 'Lukas Raymond',
-    'dis-716162001864228915': 'Rebecca Power',
+    'dis-716162001864228915': 'rebeccagpower',
     'dis-121657670800375808': 'Flaminia',
     'dis-1291176103813054536': 'Tristan',
 }
@@ -48,10 +48,11 @@ MATTERMOST_ID_TO_NAME_LOOKUP = {
     'qfk8wi1dh3gu8yigfy4cnfr5ih': 'Flaminia',
     'ez9cd8isufyq7mzn3kkwz6bgsy': 'Lukas Raymond',
     'js9fg4yf1iyx3qkdgercaiawwr': 'Mrmo Tarius',
-    '3qe87h3irt8xdm3yypkjx8z5bo': 'Rebecca Power',
+    '3qe87h3irt8xdm3yypkjx8z5bo': 'rebeccagpower',
     'xgjn141paiyfu83bg3s8nq9suw': 'Tristan',
     'xrzquxho3fgdfyd6arpz3kaxia': 'RyanTylerRae',
     '58knsrd7k3dumgsdtp41cptx1w': 'Unknown???',
+    'wgujpzmeitnefgr6dx5u7i5jah': 'Fotts',
 }
 
 HOURS_PER_WEEK = {
@@ -59,14 +60,15 @@ HOURS_PER_WEEK = {
     'Tommaso Checchi': 40,
     'RyanTylerRae': 40,
     'Ethan.Lennaman': 40,
+    'Flaminia': 40,
+    'Tristan': 40,
     'dane.curbow': 30,
     'Dominique': 30,
-    'Flaminia': 30,
-    'Rebecca Power': 30,
-    'Tristan': 30,
+    'rebeccagpower': 30,
     'Lukas Raymond': 10,
     'Mrmo Tarius': 10,
     'Unknown???': 1,
+    'Fotts': 1,
 }
 
 MATTERMOST_DB_USER = "mmuser"
