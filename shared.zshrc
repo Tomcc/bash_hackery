@@ -136,7 +136,11 @@ alias hou_dpi_low="pexp HOUDINI_UISCALE 100 && echo 'Houdini DPI set to low'"
 alias hou_dpi_hi="pexp HOUDINI_UISCALE 200 && echo 'Houdini DPI set to high'"
 
 # Robotopia aliases
-alias hammerbot="cargo run --release -p hammerbot -- "
+alias hammerbot="cargo run --release -p hammerbot --features aws -- "
+
+# fzf config and aliases
+export FZF_DEFAULT_OPTS='-i'
+alias zcode='code $(fzf)'
 
 # go to any package directory with cargo, or the root if invoked with no argument
 pgo() {
