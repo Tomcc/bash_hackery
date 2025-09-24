@@ -48,6 +48,8 @@
 	gconf = config -e --global
 	s = status
 	cp = cherry-pick
+	teleport = "!f() { git fetch origin $1:$1 && git switch $1; }; f"
+	tp = teleport
 
 	# pull and only fetch the current branch. Good for big repos
 	pill = !git pull origin $(git rev-parse --abbrev-ref HEAD)
