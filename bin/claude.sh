@@ -6,6 +6,7 @@ export AWS_REGION="us-west-2"
 
 # export ANTHROPIC_MODEL=us.anthropic.claude-3-7-sonnet-20250219-v1:0
 export ANTHROPIC_MODEL="us.anthropic.claude-sonnet-4-20250514-v1:0"
+export ANTHROPIC_MODEL="us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 export ANTHROPIC_SMALL_FAST_MODEL="us.anthropic.claude-3-5-haiku-20241022-v1:0"
 
 # Recommended output token settings for Bedrock
