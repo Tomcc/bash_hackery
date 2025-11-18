@@ -107,7 +107,6 @@ eval "$(gh copilot alias -- zsh)"
 
 export EDITOR="code"
 export HOUDINI_LMINFO_VERBOSE=0
-export DIRENV_LOG_FORMAT=
 export AUTO_NOTIFY_THRESHOLD=30
 
 # special macos config
