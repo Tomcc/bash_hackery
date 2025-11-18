@@ -1,0 +1,191 @@
+#!/usr/bin/env python3
+
+import argparse
+import subprocess
+import sys
+import os
+from datetime import datetime, timedelta
+
+def run(args, check=True, capture_output=True):
+    """Run a command and return the result."""
+    result = subprocess.run(
+        args,
+        cwd=os.getcwd(),
+        capture_output=capture_output,
+        text=True,
+        check=False
+    )
+    if check and result.returncode != 0:
+        print(f"Error running command: {' '.join(args)}", file=sys.stderr)
+        print(result.stderr, file=sys.stderr)
+        sys.exit(1)
+    return result
+
+def git(*gitargs, check=True):
+    """Run a git command."""
+    return run(["git"] + list(gitargs), check=check)
+
+def get_commit_at_date(branch, days_ago):
+    """Get the commit on a branch from N days ago."""
+    date = datetime.now() - timedelta(days=days_ago)
+    date_str = date.strftime("%Y-%m-%d")
+
+    # Use git log to find the first commit before the date
+    result = git(
+        "log", branch,
+        f"--before={date_str}",
+        "--max-count=1",
+        "--pretty=format:%H",
+        check=True
+    )
+    commit = result.stdout.strip()
+
+    if not commit:
+        print(f"No commit found on {branch} from {days_ago} days ago", file=sys.stderr)
+        return None
+
+    return commit
+
+def test_commit(commit, test_command):
+    """Test a commit with the provided command."""
+    print(f"Testing commit {commit[:8]}...")
+
+    # Checkout the commit
+    git("checkout", commit, check=True)
+
+    # Run the test command
+    result = subprocess.run(
+        test_command,
+        shell=True,
+        cwd=os.getcwd(),
+        capture_output=False
+    )
+
+    return result.returncode == 0
+
+def find_good_commit(test_command, main_branch="main", initial_days=3):
+    """Find a good commit by going back in time on main."""
+    days = initial_days
+    max_attempts = 10
+
+    for attempt in range(max_attempts):
+        commit = get_commit_at_date(main_branch, days)
+        if not commit:
+            print(f"Could not find commit {days} days ago, trying further back...", file=sys.stderr)
+            days += 3
+            continue
+
+        print(f"\nAttempt {attempt + 1}: Trying commit from {days} days ago")
+
+        if test_commit(commit, test_command):
+            print(f"✓ Found good commit: {commit[:8]}")
+            return commit
+        else:
+            print(f"✗ Commit {commit[:8]} is also bad, going back further...")
+            days += 3
+
+    print("Could not find a good commit after multiple attempts", file=sys.stderr)
+    return None
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog='git autobisect',
+        description='Automatically bisect to find the first bad commit',
+        epilog='Example: git autobisect "make test"'
+    )
+    parser.add_argument(
+        'command',
+        help='test command to run (exit code 0 = good, non-zero = bad)'
+    )
+    parser.add_argument(
+        '--days',
+        type=int,
+        default=10,
+        help='initial number of days to go back on main (default: 10)'
+    )
+    parser.add_argument(
+        '--branch',
+        default=None,
+        help='branch to search for good commit (default: main or master)'
+    )
+
+    args = parser.parse_args()
+    test_command = args.command
+
+    # Save the current HEAD
+    head_commit = git("rev-parse", "HEAD").stdout.strip()
+
+    print("Starting git autobisect...")
+    print(f"Test command: {test_command}")
+    print(f"Bad commit: {head_commit[:8]} (HEAD)")
+    print()
+
+    # Start bisect
+    git("bisect", "start")
+    git("bisect", "bad", head_commit)
+
+    # Find a good commit by going back N days on main
+    if args.branch:
+        main_branch = args.branch
+    else:
+        main_branch = "main"
+        # Check if main exists, otherwise try master
+        result = git("rev-parse", "--verify", main_branch, check=False)
+        if result.returncode != 0:
+            main_branch = "master"
+            result = git("rev-parse", "--verify", main_branch, check=False)
+            if result.returncode != 0:
+                print("Could not find main or master branch", file=sys.stderr)
+                git("bisect", "reset")
+                sys.exit(1)
+
+    print(f"Looking for good commit on '{main_branch}' branch...")
+    good_commit = find_good_commit(test_command, main_branch, args.days)
+
+    if not good_commit:
+        print("\nFailed to find a good commit. Aborting bisect.", file=sys.stderr)
+        git("bisect", "reset")
+        sys.exit(1)
+
+    # Mark the good commit
+    git("bisect", "good", good_commit)
+
+    print("\n" + "="*60)
+    print("Starting automated bisect run...")
+    print("="*60 + "\n")
+
+    # Create a wrapper script for bisect run
+    wrapper_script = "/tmp/git-autobisect-wrapper.sh"
+    with open(wrapper_script, "w") as f:
+        f.write(f"#!/bin/bash\n{test_command}\n")
+    os.chmod(wrapper_script, 0o755)
+
+    # Run git bisect run
+    result = run(["git", "bisect", "run", wrapper_script], check=False, capture_output=False)
+
+    # Clean up
+    os.remove(wrapper_script)
+
+    # Show the result
+    print("\n" + "="*60)
+    print("Bisect complete!")
+    print("="*60)
+
+    # Reset to original HEAD
+    git("bisect", "reset")
+
+    if result.returncode != 0:
+        print("\nBisect failed or was aborted", file=sys.stderr)
+        sys.exit(1)
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n\nBisect interrupted. Resetting...", file=sys.stderr)
+        git("bisect", "reset", check=False)
+        sys.exit(1)
+    except Exception as e:
+        print(f"\nError: {e}", file=sys.stderr)
+        git("bisect", "reset", check=False)
+        sys.exit(1)
