@@ -53,6 +53,9 @@ MATTERMOST_ID_TO_NAME_LOOKUP = {
     'xrzquxho3fgdfyd6arpz3kaxia': 'RyanTylerRae',
     '58knsrd7k3dumgsdtp41cptx1w': 'Unknown???',
     'wgujpzmeitnefgr6dx5u7i5jah': 'Fotts',
+    '3c63io78zj8xun79gjw7wr7o8o': 'Chris Dougherty',
+    'pp93e5ywipf1i8phdswcsxpc5h': 'Dylan Jones',
+    'ek6oeka4ptr3ie3gjbifa4y8uo': 'Massimo Avvisati',
 }
 
 HOURS_PER_WEEK = {
@@ -62,11 +65,11 @@ HOURS_PER_WEEK = {
     'Ethan.Lennaman': 40,
     'Flaminia': 40,
     'Tristan': 40,
-    'dane.curbow': 30,
-    'Dominique': 30,
-    'rebeccagpower': 30,
-    'Lukas Raymond': 10,
-    'Mrmo Tarius': 10,
+    'dane.curbow': 40,
+    'Dominique': 0,
+    'rebeccagpower': 40,
+    'Lukas Raymond': 5,
+    'Mrmo Tarius': 0,
     'Unknown???': 1,
     'Fotts': 1,
 }
