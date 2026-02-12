@@ -66,13 +66,15 @@ def test_commit(commit, test_command):
 def find_good_commit(test_command, main_branch="main", initial_days=3):
     """Find a good commit by going back in time on main."""
     days = initial_days
-    max_attempts = 10
+    max_attempts = 100
 
     for attempt in range(max_attempts):
         commit = get_commit_at_date(main_branch, days)
         if not commit:
             print(f"Could not find commit {days} days ago, trying further back...", file=sys.stderr)
-            days += 3
+
+            # increase days by 50% (rounded up) to avoid too many attempts
+            days += max(1, days // 2)
             continue
 
         print(f"\nAttempt {attempt + 1}: Trying commit from {days} days ago")
@@ -112,13 +114,29 @@ def main():
     args = parser.parse_args()
     test_command = args.command
 
+    # Check if bisect is already running
+    git_dir = git("rev-parse", "--git-dir").stdout.strip()
+    bisect_log = os.path.join(git_dir, "BISECT_LOG")
+    if os.path.exists(bisect_log):
+        print("Error: A bisect session is already running", file=sys.stderr)
+        print("Run 'git bisect reset' to end it first", file=sys.stderr)
+        sys.exit(1)
+
     # Save the current HEAD
     head_commit = git("rev-parse", "HEAD").stdout.strip()
 
     print("Starting git autobisect...")
     print(f"Test command: {test_command}")
-    print(f"Bad commit: {head_commit[:8]} (HEAD)")
     print()
+
+    # Test current commit first
+    print(f"Testing current commit {head_commit[:8]} (HEAD)...")
+    if test_commit(head_commit, test_command):
+        print("✓ Current commit is good - no need to bisect!")
+        sys.exit(0)
+    else:
+        print(f"✗ Current commit {head_commit[:8]} is bad")
+        print()
 
     # Start bisect
     git("bisect", "start")
