@@ -1,5 +1,4 @@
-# for long_command_notification
-winotify
+# notify.py is now self-contained with uv script headers
 
 # for find_package_path
 toml

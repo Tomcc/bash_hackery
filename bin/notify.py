@@ -1,7 +1,9 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.11"
-# dependencies = []
+# dependencies = [
+#   "winotify==1.1.0; sys_platform == 'win32'",
+# ]
 # ///
 
 import sys
