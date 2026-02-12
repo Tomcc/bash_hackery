@@ -10,8 +10,8 @@ notify() {
 
   # Fetch the last command with elapsed time from history:
   local -a stats=( "${=$(fc -Dl -1)}" )
-  
-  "$SCRIPT_DIR/long_command_notification.py" "$stats"
+
+  "$SCRIPT_DIR/notify.py" shell-hook "$stats"
 
   return 0  # Always return 'true' to avoid any hiccups.
 }
