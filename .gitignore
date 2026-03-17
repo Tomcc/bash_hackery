@@ -1,3 +1,15 @@
 .envrc
 *.zwc
 .DS_Store
+
+# Claude - ignore everything, then whitelist what we want
+claude/*
+!claude/commands/
+!claude/skills/
+!claude/settings.json
+!claude/projects/
+claude/projects/**/subagents/
+claude/projects/**/*.jsonl
+claude/projects/**/tool-results/
+claude/projects/-Users-tommasochecchi
+claude/projects/-Users-tommasochecchi-Developer-tomatocake-dev
