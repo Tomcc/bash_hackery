@@ -89,7 +89,7 @@ if [[ "$LINUX" == "1" ]]; then
     eval $(ssh-agent -s) > /dev/null
 elif [[ "$MACOS" == "1" ]]; then
     # on mac, use secretive
-    export SSH_AUTH_SOCK="/Users/tommaso/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
+    export SSH_AUTH_SOCK="/Users/tommasochecchi/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
 fi
 
 # ---------------- pexp ----------------
@@ -100,10 +100,6 @@ if [[ "$USE_PEXP" == "1" ]]; then
 fi
 
 # ---------------- exports ----------------
-
-eval "$(gh copilot alias -- zsh)"
-
-# ---------------- Copilot ----------------
 
 export EDITOR="code"
 export HOUDINI_LMINFO_VERBOSE=0
