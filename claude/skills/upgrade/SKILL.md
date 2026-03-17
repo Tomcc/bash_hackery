@@ -12,7 +12,7 @@ If the terminal is `ghostty`, STOP and tell the user to switch to Terminal.app f
 
 ## Step 1: Brew upgrade
 
-Run `brew update && brew upgrade`. This can take a long time (LLVM, Blender, Krita, etc). Run it in the background and monitor progress.
+Run `brew update && brew upgrade --greedy`. The `--greedy` flag ensures casks marked as "auto-updating" also get upgraded, since many don't actually auto-update. This can take a long time (LLVM, Blender, Krita, etc). Run it in the background and monitor progress.
 
 If any casks fail due to sudo prompts, collect them and tell the user to run them manually in an interactive terminal.
 
