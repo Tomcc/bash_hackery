@@ -53,6 +53,10 @@ def test_commit(commit, test_command):
     # Checkout the commit
     git("checkout", commit, check=True)
 
+    # Reset any leftover changes from the previous test run
+    git("reset", "--hard", check=True)
+    git("clean", "-fd", check=True)
+
     # Run the test command
     result = subprocess.run(
         test_command,
