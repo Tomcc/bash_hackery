@@ -115,6 +115,16 @@ if [[ "$MACOS" == "1" ]]; then
     export CARGO_PROFILE_TEST_SPLIT_DEBUGINFO=unpacked
 fi
 
+# ---------------- file descriptor limits ----------------
+
+# The macOS default soft limit (256) is far too low for tools that fan out across
+# many files/connections at once (e.g. hammerbot deploy-all). Raise it on every
+# Unix machine. Skip Windows where `ulimit` isn't meaningful.
+if [[ "$WINDOWS" == "0" ]]; then
+    ulimit -Sn 8192    # soft
+    ulimit -Hn 8192    # hard (cannot exceed system/launchd hard limit)
+fi
+
 # ---------------- aliases ----------------
 
 alias less="less -R"
@@ -132,6 +142,11 @@ alias hou_dpi_hi="pexp HOUDINI_UISCALE 200 && echo 'Houdini DPI set to high'"
 
 # Robotopia aliases
 alias hammerbot="cargo run --release -p hammerbot --features aws -- "
+
+# cow <name>: CoW-clone the current repo into ../cows/<name> and cd there (cow test && claude)
+if [[ "$MACOS" == "1" && -f "$HOME/Developer/tomatocake-dev/tools/cow.sh" ]]; then
+    source "$HOME/Developer/tomatocake-dev/tools/cow.sh"
+fi
 
 # fzf config and aliases
 export FZF_DEFAULT_OPTS='-i'
