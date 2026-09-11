@@ -2,10 +2,15 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "env": {
     "CLAUDE_CODE_USE_BEDROCK": "1",
+    "ENABLE_PROMPT_CACHING_1H": "1",
     "AWS_REGION": "us-west-2",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "us.anthropic.claude-sonnet-4-6",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "us.anthropic.claude-opus-4-6-v1",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "us.anthropic.claude-opus-5[1m]",
+    "ANTHROPIC_DEFAULT_FABLE_MODEL": "us.anthropic.claude-fable-5[1m]"
+  },
+  "permissions": {
+    "defaultMode": "auto"
   },
   "model": "opus",
   "hooks": {
@@ -15,7 +20,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/tommasochecchi/Developer/bash_hackery/bin/notify.py message 'Claude Code needs attention' --title 'Claude Code'"
+            "command": "$HOME/Developer/bash_hackery/bin/notify.py message 'Claude Code needs attention' --title 'Claude Code'"
           }
         ]
       }
@@ -26,15 +31,21 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/tommasochecchi/Developer/bash_hackery/bin/notify.py message 'Claude finished responding' --title 'Claude Code'"
+            "command": "$HOME/Developer/bash_hackery/bin/notify.py message 'Claude finished responding' --title 'Claude Code'"
           }
         ]
       }
     ]
   },
-  "enabledPlugins": {
-    "rust-analyzer-lsp@claude-plugins-official": true
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline-command.sh"
   },
+  "enabledPlugins": {},
+  "tui": "fullscreen",
+  "skipDangerousModePermissionPrompt": true,
+  "skipWorkflowUsageWarning": true,
+  "theme": "light-ansi",
   "feedbackSurveyState": {
     "lastShownTime": 1754086342343
   }

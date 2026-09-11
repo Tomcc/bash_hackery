@@ -148,6 +148,16 @@ if [[ "$MACOS" == "1" && -f "$HOME/Developer/tomatocake-dev/tools/cow.sh" ]]; th
     source "$HOME/Developer/tomatocake-dev/tools/cow.sh"
 fi
 
+# assembly-workspace <name>: attach/create a named tmux session on the farm VM
+if [[ -f "$HOME/Developer/tomatocake-dev/tools/assembly/assembly-workspace.sh" ]]; then
+    source "$HOME/Developer/tomatocake-dev/tools/assembly/assembly-workspace.sh"
+fi
+
+# assembly-agent <session-uuid>: attach your terminal to a running Assembly agent
+if [[ -f "$HOME/Developer/tomatocake-dev/tools/assembly/assembly-agent.sh" ]]; then
+    source "$HOME/Developer/tomatocake-dev/tools/assembly/assembly-agent.sh"
+fi
+
 # fzf config and aliases
 export FZF_DEFAULT_OPTS='-i'
 alias zcode='code $(fzf)'
