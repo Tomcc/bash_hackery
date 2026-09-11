@@ -1,0 +1,2 @@
+- [Treasure hunt project](treasure-hunt-project.md) — book transcription repo is ~/Developer/treasure, not the monorepo
+- [No preprocessing, let the reader iterate](no-preprocessing-let-reader-agent-iterate.md) — reading agents crop/check themselves; no pipelines

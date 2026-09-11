@@ -1,0 +1,2 @@
+- [Bisect: verify both ends, pin the tool](bisect-verify-both-ends-and-pin-the-tool.md) — a bisect whose bad end was never measured still names a commit, confidently and wrongly.
+- [robo build --install for the launcher](robo-build-install-needs-tag.md) — the local build→launcher loop, its flags, and the traps that waste a cycle.

@@ -1,0 +1,3 @@
+- [Unity batchmode has no frame cap](unity-batchmode-has-no-frame-cap.md) — frame-count and timing assertions in PlayMode tests measure nothing; assert the thread instead.
+- [SSH login shells hang on pexp's watcher](ssh-login-shell-hangs-on-pexp-watcher.md) — `zsh -ilc` over ssh never returns; redirect stdout to a file.
+- [brew rustup has no cargo shim](brew-rustup-has-no-cargo-shim.md) — no cargo on PATH, no ~/.cargo/env; use `rustup run stable cargo`.

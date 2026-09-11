@@ -1,0 +1,4 @@
+- [Treasure hunt project](treasure-hunt-project.md) — project state; CLAUDE.md carries the shared doctrine
+- [No preprocessing, let the reader iterate](no-preprocessing-let-reader-agent-iterate.md) — reading agents crop/check themselves; no pipelines
+- [Handoff from monorepo session](handoff-from-monorepo-session.md) — pending work + old transcript path
+- [No TodoWrite tool here](no-todowrite-tool-in-this-env.md) — use a session TODO file; user asks about this

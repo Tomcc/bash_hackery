@@ -8,8 +8,9 @@ claude/*
 !claude/skills/
 !claude/settings.json
 !claude/projects/
-claude/projects/**/subagents/
-claude/projects/**/*.jsonl
-claude/projects/**/tool-results/
+# Under a project only memory/ is ours; everything else is per-session churn
+# (transcripts, workflows, tool-results) that Claude Code keeps inventing more of.
+claude/projects/*/*
+!claude/projects/*/memory/
 claude/projects/-Users-tommasochecchi
 claude/projects/-Users-tommasochecchi-Developer-tomatocake-dev

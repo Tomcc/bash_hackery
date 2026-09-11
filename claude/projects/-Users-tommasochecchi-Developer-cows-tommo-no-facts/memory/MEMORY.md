@@ -1,0 +1,9 @@
+- [Skills hold rules, memories hold incidents](skills-hold-rules-memories-hold-incidents.md) — don't add debugging findings to team skills.
+- [Stale hammerbot binary mimics a compile failure](stale-hammerbot-binary-mimics-compile-failure.md) — a 7s `robo code-build` failure that was not about the C#.
+- [The embeddings store's immutable open](embeddings-store-immutable-open.md) — reading a shipped cache with no lock, and two designs rejected before it.
+- [Driving the Unity Editor for editor code](driving-unity-editor-for-editor-code.md) — the compile-and-exercise loop, and the main-thread trap.
+- [`unity open <name>` opens the wrong cow](unity-open-resolves-hub-registry-first.md) — the Hub registry beats local paths; always pass an absolute path.
+- [temporaryCachePath is $TMPDIR, not ~/Library/Caches](unity-temporary-cache-path-is-tmpdir.md) — where the embeddings cache really lives on macOS.
+- [extralint tests dirty the working tree](extralint-tests-dirty-the-working-tree.md) — they mutate real source files and leave them broken, faking test failures.
+- [Reading a Resources TextAsset out of a built player](reading-a-resources-textasset-from-a-built-player.md) — the resources.assets byte layout, no Unity needed.
+- [temp::dir panics in hammerbot unit tests](temp-dir-panics-in-hammerbot-unit-tests.md) — use tempfile, and `--bins` not `--lib`.

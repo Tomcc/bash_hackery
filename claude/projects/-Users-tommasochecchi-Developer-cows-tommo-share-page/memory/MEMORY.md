@@ -1,0 +1,1 @@
+- [Stopgap vs infra tradeoff](stopgap-vs-infra-tradeoff.md) — short-lived features get the low-friction option, not the clean one.

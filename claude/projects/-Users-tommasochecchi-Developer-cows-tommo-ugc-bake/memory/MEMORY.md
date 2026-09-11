@@ -1,0 +1,12 @@
+- [UGC APV bake ladder](ugc-apv-bake-ladder.md) — bake quality now beats Unity's; baker is Rust driving Blender; next: TS format writer
+- [Cycles gather is pixel-bound](cycles-gather-is-pixel-bound.md) — tracing is 1.6% of the render; a $0.055/hr 3060 ties a 3090; 224s cold-start tax
+- [Probe baker on vast.ai](probe-baker-vast-workflow.md) — image, vast_bake.py, dedicated SSH key, stop-not-destroy
+- [Vast bake box economics](vast-bake-box-economics.md) — $0.057/hr 3060, 35s a bake, keep it alive (warm OptiX state isn't shippable)
+- [Show renders, let Tommo judge](show-renders-let-tommo-judge.md) — `open` image comparisons; Claude's vision misses unstructured artifacts, MAE saturates
+- [rg -r is --replace](rg-dash-r-is-replace.md) — not recursive; silently corrupts output
+- [Linear priority calibration](linear-priority-calibration.md) — Urgent = drop-everything; unplanned project work caps at High
+- [Unity CLI drives the open editor](unity-cli-drives-open-editor.md) — run play-mode tests without closing Tommo's Unity
+- [Leaked HDRP Volume breaks the editor](hdrp-leaked-volume-breaks-editor.md) — why "geometry stopped rendering" was my own test leaking, and how to not do it again
+- [APV fixture scene facts](apv-fixture-scene-facts.md) — probe volumes are brushes, ensure the waste is zeroed, HDRP exposure gotchas
+- [Probe baker algorithm priorities](probe-baker-algorithm-priorities.md) — OptiX gives no sampling algorithms; what actually beats brute-force MC
+- [Blender headless bake facts](blender-headless-bake-facts.md) — measured timings, kernel cache location, vertex-colour bake API, and the edit-mode-hangs-in-background trap
