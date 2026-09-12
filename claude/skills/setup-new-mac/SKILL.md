@@ -176,6 +176,33 @@ when every repo you touch pins its own channel.
 **`setup_mac.sh` is long broken** — its brew line reads `brew install git install zsh …`, so it tries
 to install a package literally named `install`. Install by hand.
 
+### git config: base.gitconfig is only wired up on Linux
+
+`setup_linux.sh:33` does `git config --global include.path "$(pwd)/base.gitconfig"`. **`setup_mac.sh`
+never does**, so on a fresh Mac none of it is active — no `pull.rebase`, no `push.autoSetupRemote`,
+no `rebase.autostash`, no vscode mergetool, and no `[user] name`.
+
+`base.gitconfig` deliberately sets **name but not email**, so both the include and the email are
+needed:
+
+```bash
+git config --global include.path ~/Developer/bash_hackery/base.gitconfig
+git config --global user.name "Tommaso Checchi"          # explicit: survives ~/Developer being wiped
+git config --global user.email "tommaso.checchi1@gmail.com"
+brew install diff-so-fancy                               # base.gitconfig sets it as core.pager
+```
+
+Three traps here:
+
+- **Without an identity, git does not error — it invents one** from the hostname, e.g.
+  `Tommaso <tommaso@Chriss-Mac-mini.local>`. Commits succeed and look fine locally but never
+  attribute to your GitHub account, and you can't fix it after the fact without rewriting history.
+  Set identity *before* the first commit on a new machine.
+- **`git config --global --list` does not expand includes**, so the settings look absent even when
+  they're working. Verify with `git config --get pull.rebase` instead.
+- **`core.pager = diff-so-fancy | less …` breaks silently if diff-so-fancy is missing.** Scripted git
+  calls piped into `head` skip the pager entirely, so it only fails once you use git interactively.
+
 ## Karabiner: mouse buttons
 
 Works via `pointing_button` in the device's `simple_modifications`, but the device entry needs
