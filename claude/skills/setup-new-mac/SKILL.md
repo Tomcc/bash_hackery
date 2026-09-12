@@ -136,6 +136,25 @@ cargo install --path ~/Developer/bash_hackery/pexp     # provides pexp_bin
 brew install direnv thefuck
 ```
 
+### `cargo: command not found` even though rustup works
+
+Homebrew's `rustup` is **keg-only** — it conflicts with the `rust` formula, so brew refuses to
+symlink its binaries. Only `rustup` itself lands in `/opt/homebrew/bin`; `cargo`, `rustc`,
+`clippy-driver`, `rustfmt` and `rust-analyzer` all sit unlinked in the keg. The formula also
+**no longer provides `rustup-init`**, which is what used to create the `~/.cargo/bin` shims.
+
+So `rustup show` reports a healthy active toolchain while `which cargo` finds nothing. Nothing is
+broken — there's just no path to it. Add the keg's bin to `~/.zshenv`:
+
+```zsh
+# use opt/ not Cellar/ so it survives version bumps
+export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
+```
+
+Keep the separate `$HOME/.cargo/bin` entry too — that one is for binaries produced by
+`cargo install` (e.g. `pexp_bin`), which is a different directory from the toolchain shims.
+Verify with `rustup which cargo`, which should resolve into `~/.rustup/toolchains/...`.
+
 **`setup_mac.sh` is long broken** — its brew line reads `brew install git install zsh …`, so it tries
 to install a package literally named `install`. Install by hand.
 
