@@ -155,6 +155,24 @@ Keep the separate `$HOME/.cargo/bin` entry too — that one is for binaries prod
 `cargo install` (e.g. `pexp_bin`), which is a different directory from the toolchain shims.
 Verify with `rustup which cargo`, which should resolve into `~/.rustup/toolchains/...`.
 
+**Do NOT "fix" this by running `brew install rust`.** It's the tempting move when `cargo` isn't
+found, and it silently breaks two things:
+
+- `main-repo/rust-toolchain.toml` pins `channel = "1.97.1"`. The `rust` formula ships one fixed
+  version (1.98.1 at time of writing) and has no concept of that file, so it would build the game
+  with the wrong compiler and never say so. rustup switches per-directory — verify with
+  `rustup show active-toolchain`, which reports `overridden by '…/rust-toolchain.toml'` inside the
+  repo and `default` outside it.
+- `main-repo` uses **cargo-lambda** (`.cargolambdaignore`, plus the `cloud_api/*` workspace
+  members), which cross-compiles to Linux. That needs `rustup target add`; the `rust` formula
+  can't add targets at all.
+
+The two formulae conflict, which is *why* rustup is keg-only. The `rust` formula is not new —
+the packaging change was on the rustup side.
+
+Toolchains cost ~1.3–1.4 GB each. If disk gets tight, `rustup toolchain uninstall stable` is safe
+when every repo you touch pins its own channel.
+
 **`setup_mac.sh` is long broken** — its brew line reads `brew install git install zsh …`, so it tries
 to install a package literally named `install`. Install by hand.
 
