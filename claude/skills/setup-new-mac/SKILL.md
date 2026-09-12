@@ -179,18 +179,19 @@ to install a package literally named `install`. Install by hand.
 ## Karabiner: mouse buttons
 
 Works via `pointing_button` in the device's `simple_modifications`, but the device entry needs
-`"ignore": false` or Karabiner won't grab it. Mission Control should be the real HID event, not a
-faked Ctrl+↑ (which breaks if the shortcut is rebound):
+`"ignore": false` or Karabiner won't grab it. Prefer the real HID event over a faked keystroke — e.g.
+`apple_vendor_keyboard_key_code: mission_control` rather than Ctrl+↑, which breaks if that shortcut
+gets rebound:
 
 ```json
 {
-  "from": { "pointing_button": "button5" },
-  "to": [{ "apple_vendor_keyboard_key_code": "mission_control" }]
+  "from": { "pointing_button": "button4" },
+  "to": [{ "apple_vendor_top_case_key_code": "keyboard_fn" }]
 }
 ```
 
 Button numbering differs between tools — **use `Karabiner-EventViewer.app`** to see what the mouse
-actually emits rather than guessing from MacMouseFix's numbering.
+actually emits rather than guessing from Mac Mouse Fix's numbering.
 
 **Karabiner and Mac Mouse Fix split the mouse — don't let them overlap.** Karabiner grabs the
 device (`"ignore": false`) and forwards anything it doesn't map, so any button MMF needs must have
@@ -283,6 +284,32 @@ iPhone Mirroring needs 15+. Finder device sync has worked since 10.15 and is not
 Mac on 14.1.2 has Swift 5.10 and cannot build any package declaring
 `swift-tools-version: 6.0` — including `padded-parakeet`. Upgrade macOS first.
 
+**A macOS upgrade does NOT update the Command Line Tools.** Verified: after going 14.1.2 → 15.7.9,
+`swift --version` still reported 5.10 and the SDK was still 14.4. Install CLT separately:
+
+```bash
+softwareupdate --list                                             # look for "Command Line Tools for Xcode-16.4"
+sudo softwareupdate --install "Command Line Tools for Xcode-16.4" # ~862 MB → Swift 6.1.2, SDK 15.5
+```
+
+Don't trust `pkgutil --pkg-info=com.apple.pkg.CLTools_Executables` afterwards — its receipt still
+read `15.3.0` while `swift --version` correctly reported 6.1.2. Check `swift --version`.
+
+### After a major macOS upgrade
+
+What survived a 14 → 15 upgrade, so you don't waste time re-doing it: `pmset` sleep settings, Remote
+Login, Screen Sharing, and **Karabiner** (its DriverKit extension came back `[activated enabled]`
+with no re-approval — the commonly-repeated advice that it needs re-granting was wrong here).
+
+What broke:
+
+- **Tailscale was stopped** and had to be relaunched (`open -a Tailscale`). On a machine you reach
+  remotely this is the one that locks you out, so check it first.
+- CLT, as above.
+
+Also: once you're on 15, Software Update will list **macOS Tahoe 26 marked `Recommended: YES`**.
+If 15 was a deliberate choice, that's a one-click mistake waiting to happen.
+
 ## Big clones and LFS
 
 **Do not diagnose an in-progress clone as corrupt.** Mid-checkout you will see thousands of `D`
@@ -307,6 +334,45 @@ nohup git clone <url> > /tmp/clone.log 2>&1 & disown
 ```
 
 Confirm success with `git status --porcelain | wc -l` reaching 0, not by directory size.
+
+## Measuring disk space (this is where I got things wrong twice)
+
+**`du` cannot account for a whole macOS disk.** Firmlinks make `/Users`, `/Library`, `/Applications`
+appear under `/` while physically living on the data volume, and `du -x` does not reliably detect the
+boundary. Symptom: `/System` reports 81 GB while every one of its children reports 0 B, and the
+totals don't reconcile with `df`. Don't build a theory on it — I concluded "108 GB of unexplained
+cruft" that didn't exist.
+
+Ground truth is **per-filesystem `df`**:
+
+```bash
+df -H / /System/Volumes/Data /System/Volumes/Update
+```
+
+**`sudo du` still fails without Full Disk Access.** TCC blocks protected paths even for root, so you
+get a wall of "Operation not permitted". Either grant your terminal FDA (System Settings → Privacy &
+Security → Full Disk Access) or — easier — read **System Settings → General → Storage**, which is
+Apple's own accounting and needs no permissions.
+
+**APFS reclaims asynchronously.** Deleting 15 GB and immediately re-running `df` can show almost no
+change. Wait and re-measure before concluding the delete failed.
+
+Two things that legitimately hold space after an upgrade:
+
+```bash
+# OS-update snapshot; check for "Purgeable: No" and "limits the minimum size of APFS Container"
+diskutil apfs listSnapshots /
+sudo tmutil deletelocalsnapshots <com.apple.os.update-…>
+
+# the installer itself, ~15 GB — root-owned if mist ran under sudo, so this needs sudo
+sudo rm -rf ~/Downloads/Install\ macOS\ *.app
+```
+
+Sizing reality on a 256 GB machine (`APPLE SSD AP0256Q` → 245 GB APFS container): macOS + apps +
+`/Library` take ~38 GB, leaving ~207 GB. A 20 GB game repo, an 8.6 GB Unity editor, a Sequoia
+installer and two concurrent builds will genuinely run it out — free space dropped from 53 GB to
+32 GB in one evening. Watch out for Unity's `Library/` cache on first project open (plausibly
+10–40 GB for a repo with thousands of LFS art files) and Rust `target/` dirs.
 
 ## Borrowed machine: hygiene and teardown
 
@@ -385,10 +451,40 @@ it can't be set with `defaults write` — and it's easy to forget when migrating
 auth failure.
 
 **padded-parakeet** — `main` is Swift-only; the Rust server was removed. The Apple SpeechTranscriber
-engine needs the macOS 26 SDK and lives on the `speech-transcriber` branch. Build and register the
-launchd agent with `swift/install.sh`, which requires `OPENROUTER_API_KEY` in the environment
-(launchd can't source shell files, so the script bakes it into the plist) and installs to `~/bin`.
-Needs Swift 6.0 → macOS 14.5+.
+engine needs the macOS 26 SDK and lives on the `speech-transcriber` branch. Needs Swift 6.0, so
+macOS 14.5+ and CLT 16.
+
+```bash
+source ~/.pexprc                                   # install.sh hard-requires OPENROUTER_API_KEY
+cd ~/Developer/padded-parakeet/swift && ./install.sh
+tail -f ~/Library/Logs/PaddedParakeet.log
+```
+
+`install.sh` builds release (~390 s cold, most of it fetching WhisperKit/hummingbird/swift-nio),
+copies the binary **and its resource bundle** to `~/bin`, writes the LaunchAgent with the API key
+baked in (launchd can't source shell files), and bootstraps it. It listens on **`127.0.0.1:8737`**,
+which must match MacWhisper's `customOpenAIWhisperProviderBaseURL`. Override with `ADDR=host:port`.
+`App.swift`'s own default is `:8000` — too contended on a dev machine, which is why the plist passes
+`--addr` explicitly.
+
+Then grant **Accessibility** to `~/bin/PaddedParakeet` (System Settings → Privacy & Security →
+Accessibility), or the log warns "edit mode will not read selected text" and edit mode silently
+won't work.
+
+**Never sync a compiled Swift binary between Macs.** `Bundle.module` checks next to the executable
+and then falls back to the absolute `.build` path baked in at compile time. A binary carried over
+from another machine resolves that fallback into the *other* machine's home, dies at startup, and —
+because the agent sets `KeepAlive` — restarts forever. This produced 128 crash-loops with an
+inherited `~/bin/PaddedParakeet` before a local build replaced it. Symptom to recognise:
+
+```
+Fatal error: could not load resource bundle: from /Users/<you>/bin/X_X.bundle
+  or /Users/<someone-else>/Developer/…/.build/…/X_X.bundle
+```
+
+Rebuild from source on each machine. And when debugging a `KeepAlive` agent, check
+`grep -c 'Mode: padded' ~/Library/Logs/PaddedParakeet.log` — a high count means crash-looping, and
+sampling the PID twice tells you whether it's stabilised.
 
 **Rectangle** is the window manager (drag-to-top vertical extend). **Mac Mouse Fix is installed
 alongside Karabiner**, not replaced by it — it owns `button5` Click & Drag for switching screens,
