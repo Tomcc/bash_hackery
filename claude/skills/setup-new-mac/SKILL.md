@@ -198,6 +198,22 @@ smooth scrolling. That capability is simply lost.
 Karabiner reloads `~/.config/karabiner/karabiner.json` on external change, so edits apply live.
 Validate after editing (`python3 -m json.tool`) and keep a backup.
 
+### Fn / 🌐 also opens the emoji panel
+
+MacWhisper dictation is bound to `fn` (`dictationKeyboardButton = "fn"`). macOS *also* claims that
+key — unset, it defaults to Show Emoji & Symbols, so every dictation trigger pops the emoji pane too.
+
+```bash
+defaults write com.apple.HIToolbox AppleFnUsageType -int 0
+#  0 = Do Nothing   1 = Change Input Source   2 = Show Emoji & Symbols   3 = Start Dictation
+```
+
+GUI equivalent: System Settings → Keyboard → "Press 🌐 key to" → Do Nothing.
+
+**HIToolbox only reads this at login**, so the `defaults write` doesn't apply until you log out and
+back in. Annoying corollary: Settings will already *display* "Do Nothing" while the old behaviour
+is still live, so you can't apply it by toggling — switch it to something else and back.
+
 ## Unity Hub headless install
 
 Two traps, both of which look like a silent hang:
