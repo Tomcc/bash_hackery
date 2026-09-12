@@ -121,9 +121,10 @@ git -c url."https://github.com/".insteadOf="git@github.com:" \
   submodule update --init pexp zsh-autosuggestions zsh-syntax-highlighting
 ```
 
-The `insteadOf` is needed because submodule URLs are `git@github.com:` SSH and a fresh Mac has no
-GitHub-registered key. `git -c` propagates to submodule clones via `GIT_CONFIG_PARAMETERS`, so it
-leaves no on-disk diff — better than `git submodule set-url`, which dirties `.gitmodules`.
+The `-c url…insteadOf` is needed because submodule URLs are `git@github.com:` SSH and a fresh Mac has
+no GitHub-registered key; `git -c` propagates to submodule clones via `GIT_CONFIG_PARAMETERS`, so it
+leaves no on-disk diff — better than `git submodule set-url`, which dirties `.gitmodules`. Better
+still, set the rewrite **globally once** (see the git config section) and drop the `-c` entirely.
 
 On macOS `shared.zshrc` sets `USE_ANTIGEN=1`, so plugins come from antigen bundles and those
 submodule dirs are never read anyway.
@@ -189,8 +190,15 @@ needed:
 git config --global include.path ~/Developer/bash_hackery/base.gitconfig
 git config --global user.name "Tommaso Checchi"          # explicit: survives ~/Developer being wiped
 git config --global user.email "tommaso.checchi1@gmail.com"
+git config --global url."https://github.com/".insteadOf "git@github.com:"
 brew install diff-so-fancy                               # base.gitconfig sets it as core.pager
 ```
+
+That `insteadOf` line is not optional once the include is active. `base.gitconfig` sets
+`submodule.recurse = true`, so **every `git fetch` recurses into submodules** — and those are
+`git@github.com:` URLs. On a machine with no GitHub-registered SSH key (the norm here, since git auth
+is HTTPS + gh token) each fetch spews `Host key verification failed` three times. The rewrite sends
+them over HTTPS instead, needs no key, and no host key in `known_hosts`.
 
 Three traps here:
 
