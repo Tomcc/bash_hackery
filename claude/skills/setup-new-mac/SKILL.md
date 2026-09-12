@@ -210,9 +210,9 @@ defaults write com.apple.HIToolbox AppleFnUsageType -int 0
 
 GUI equivalent: System Settings → Keyboard → "Press 🌐 key to" → Do Nothing.
 
-**HIToolbox only reads this at login**, so the `defaults write` doesn't apply until you log out and
-back in. Annoying corollary: Settings will already *display* "Do Nothing" while the old behaviour
-is still live, so you can't apply it by toggling — switch it to something else and back.
+Takes effect immediately — **no logout needed** (verified on macOS 15.7.9). If it ever doesn't,
+switch it to another value and back in Settings to force a reload, since the pane will already
+display the value written by `defaults`.
 
 ## Unity Hub headless install
 
