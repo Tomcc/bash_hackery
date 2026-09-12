@@ -192,8 +192,23 @@ faked Ctrl+↑ (which breaks if the shortcut is rebound):
 Button numbering differs between tools — **use `Karabiner-EventViewer.app`** to see what the mouse
 actually emits rather than guessing from MacMouseFix's numbering.
 
-Karabiner replaces MacMouseFix's button remaps and `mouse_flip_vertical_wheel`, but **not** its
-smooth scrolling. That capability is simply lost.
+**Karabiner and Mac Mouse Fix split the mouse — don't let them overlap.** Karabiner grabs the
+device (`"ignore": false`) and forwards anything it doesn't map, so any button MMF needs must have
+**no** Karabiner binding at all, or Karabiner intercepts it first and MMF never sees the event.
+
+Current division of labour on the Logitech (`vendor_id 1133`):
+
+| Button | Owner | Action |
+|---|---|---|
+| `button4` | Karabiner | → `keyboard_fn` |
+| `button5` | **Mac Mouse Fix** | Click & Drag to switch between screens/spaces — leave unbound in Karabiner |
+| `button6` | Karabiner | → `return_or_enter` |
+
+Karabiner cannot do Click & Drag gestures (it maps discrete events, not drags), and it has no
+equivalent of MMF's smooth scrolling. That's why MMF is installed alongside it rather than replaced.
+
+Watch for a scroll-direction conflict: Karabiner sets `mouse_flip_vertical_wheel: true` and MMF has
+its own scroll handling. If scrolling feels inverted or doubly-inverted, turn one of them off.
 
 Karabiner reloads `~/.config/karabiner/karabiner.json` on external change, so edits apply live.
 Validate after editing (`python3 -m json.tool`) and keep a backup.
@@ -375,5 +390,6 @@ launchd agent with `swift/install.sh`, which requires `OPENROUTER_API_KEY` in th
 (launchd can't source shell files, so the script bakes it into the plist) and installs to `~/bin`.
 Needs Swift 6.0 → macOS 14.5+.
 
-**Rectangle** is the window manager (drag-to-top vertical extend). **MacMouseFix is deliberately
-retired** in favour of Karabiner.
+**Rectangle** is the window manager (drag-to-top vertical extend). **Mac Mouse Fix is installed
+alongside Karabiner**, not replaced by it — it owns `button5` Click & Drag for switching screens,
+which Karabiner can't express. See the Karabiner section for the button split.
