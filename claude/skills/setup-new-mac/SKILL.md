@@ -23,6 +23,42 @@ a one-liner to paste into a real terminal tab. Chain it so it's a single paste:
 brew install mist-cli && sudo mist download installer "15.7.9" application --output-directory ~/Downloads
 ```
 
+## Driving the machine over SSH as an agent
+
+**A login shell over SSH never returns** once `shared.zshrc` is wired up. `pexp_setup.sh` spawns
+`pexp_bin watch $$ &`, which inherits the SSH session's stdout and holds it open forever. That looks
+like a hung command, not an error. Redirect inside the remote command:
+
+```bash
+ssh host 'zsh -ilc "…" > /tmp/out 2>/dev/null </dev/null; cat /tmp/out'
+```
+
+Non-login shells (`ssh host 'cmd'`) skip `.zshrc` and are unaffected — but then `PATH` has no
+`/opt/homebrew/bin`, so call `brew` by absolute path or export it first.
+
+**That watcher can abort and take your session with it.** `kill(pid, SIGUSR2).expect(…)` at
+`pexp/src/main.rs:140` panics with `ESRCH` once the parent shell is gone — and it panics inside
+notify's fsevents callback, which is called from C, so since Rust 1.81 that's an immediate `abort()`
+that kills the process group. Every closed terminal leaves an orphan watcher armed to do this on the
+next `.pexprc` write. Older binaries predate the change and unwind harmlessly, so this only shows up
+on a freshly built `pexp_bin`.
+
+**TCC-blocked directories are still discoverable via Spotlight.** sshd has no Full Disk Access, so
+`ls ~/Downloads` returns *Operation not permitted*. `mdfind` reads the index rather than the files:
+
+```bash
+mdfind -name "Install macOS"          # finds it
+mdls -name kMDItemVersion "…app"      # metadata works; kMDItemFSSize is null for bundles
+```
+
+**Casks whose artifact is a `.pkg` need `sudo`**, so an agent cannot install them at all. Do the slow
+half and hand over a paste that finishes instantly:
+
+```bash
+brew fetch --cask zoom onedrive       # no sudo, lands in brew's cache
+# user then pastes: brew install --cask zoom onedrive
+```
+
 ## Remote access
 
 `systemsetup -setremotelogin on` **exits 0 while doing nothing** when the calling terminal lacks
@@ -110,6 +146,21 @@ export SSH_AUTH_SOCK="$HOME/Library/Containers/com.maxgoedjen.Secretive.SecretAg
 ```
 
 Same class of bug: `.gitignore` entries like `claude/projects/-Users-<name>` won't match elsewhere.
+
+**`~/.claude` is a symlink into the repo** (`ln -s ~/Developer/bash_hackery/claude ~/.claude`), so
+Claude's own memory writes are repo changes. If only `~/.claude/skills` is symlinked instead, anything
+`settings.json` points at by absolute path — e.g. `statusline-command.sh` — has to be linked
+separately or it silently won't exist on that machine.
+
+The ignore rules under `claude/` are a **whitelist, and it has to stay inverted**. Naming artifacts to
+exclude leaks every new type Claude Code invents (this already happened with `workflows/` and
+`auto-mode-classifier-error.txt`), and it's also why a new file like `statusline-command.sh` needs an
+explicit `!` line or it never gets committed:
+
+```
+claude/projects/*/*
+!claude/projects/*/memory/
+```
 
 **Orphaned gitlinks.** `zsh-histdb` and `zsh-z` exist as tree entries with no `.gitmodules` mapping
 (their entries were removed when atuin replaced histdb, but the gitlinks were left behind). Git
@@ -265,6 +316,48 @@ Takes effect immediately — **no logout needed** (verified on macOS 15.7.9). If
 switch it to another value and back in Settings to force a reload, since the pane will already
 display the value written by `defaults`.
 
+## Migrating prefs to another Mac
+
+`scp`-ing a plist **loses silently**: `cfprefsd` caches the domain, and a running app rewrites it on
+quit. Quit the app first, then go through `defaults`, which writes via `cfprefsd` so the value is live:
+
+```bash
+defaults export <domain> /tmp/x.plist        # on the source
+defaults export <domain> /tmp/backup.plist   # on the target, FIRST
+defaults import <domain> /tmp/x.plist        # on the target
+```
+
+**`defaults export` writes a *binary* plist, so grepping it finds nothing** — including when you're
+checking for hardcoded `/Users/<name>` paths before copying. Worse, `grep -c` on a binary file prints
+an empty string rather than `0`, so a shell test on it reads as "clean". Convert first:
+
+```bash
+plutil -convert xml1 -o - x.plist | grep -oE "/Users/[^<\"]*"
+```
+
+**Keychain-backed values do not travel** in a plist — licenses and provider API keys stay behind (see
+MacWhisper). A plist carries the *setting*, never the *secret*.
+
+**Karabiner: strip hardware-specific device blocks before copying `karabiner.json`.** A device entry
+whose identifiers are only `{"is_keyboard": true}` matches **every** keyboard, so a workaround for one
+machine's broken hardware follows you onto machines that don't need it. The MBP's dead-spacebar remap
+(`spacebar` → `vk_none`, `right_option` → `spacebar`) disables space on the target the moment
+Karabiner is enabled there:
+
+```bash
+python3 - <<'EOF'
+import json
+p = "/Users/<you>/.config/karabiner/karabiner.json"
+d = json.load(open(p)); prof = d["profiles"][0]
+prof["devices"] = [v for v in prof["devices"]
+                   if not any(m["from"].get("key_code") == "spacebar"
+                              for m in v.get("simple_modifications", []))]
+json.dump(d, open(p, "w"), indent=4)
+EOF
+```
+
+Profile-level `simple_modifications` are hardware-agnostic and safe to carry as-is.
+
 ## Unity Hub headless install
 
 Two traps, both of which look like a silent hang:
@@ -314,6 +407,10 @@ brew install mist-cli && sudo mist download installer "15.7.9" application --out
 
 Version landmarks: **Liquid Glass = macOS 26 Tahoe**; the last version before it is **15 Sequoia**.
 iPhone Mirroring needs 15+. Finder device sync has worked since 10.15 and is not a reason to upgrade.
+
+**Apps gate on the *minor* version and report it misleadingly.** OneDrive needs 14.4+; on 14.1.2 its
+installer prints `Cannot install on volume / because it is disabled` next to the version requirement,
+which reads like a disk or volume fault rather than a version one. Check the version line first.
 
 **Xcode/Swift coupling:** Swift 6.0 requires Xcode 16 / CLT 16, which requires **macOS 14.5+**. A
 Mac on 14.1.2 has Swift 5.10 and cannot build any package declaring

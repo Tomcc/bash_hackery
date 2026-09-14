@@ -7,6 +7,8 @@ claude/*
 !claude/commands/
 !claude/skills/
 !claude/settings.json
+# settings.json points at this by path, so it has to ship alongside it
+!claude/statusline-command.sh
 !claude/projects/
 # Under a project only memory/ is ours; everything else is per-session churn
 # (transcripts, workflows, tool-results) that Claude Code keeps inventing more of.
