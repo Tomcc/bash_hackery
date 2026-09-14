@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: reference
   originSessionId: 4e237cbd-1065-48bd-92a1-1b11704047ad
-  modified: 2026-09-11T20:43:55.222Z
+  modified: 2026-09-14T07:40:51.191Z
 ---
 
 `shared.zshrc` sources `pexp_setup.sh`, which spawns `pexp_bin watch $$ &`. That daemon
@@ -16,4 +16,4 @@ like a hung command, not a failure.
 `ssh host 'zsh -ilc "..." > /tmp/out 2>/dev/null </dev/null; cat /tmp/out'`.
 Non-login shells (`ssh host 'cmd'`) are unaffected since they skip `.zshrc`.
 
-Related: [[brew-rustup-has-no-cargo-shim]].
+The `setup-new-mac` skill covers this and the rest of the remote-Mac gotchas in full.
