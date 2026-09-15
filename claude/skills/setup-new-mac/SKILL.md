@@ -127,6 +127,25 @@ Host <target>
 **TCC blocks sshd** from writing to `~/Desktop`, `~/Documents`, `~/Downloads` unless it has Full
 Disk Access. Dotfiles are unaffected; expect permission errors (not hangs) for those three.
 
+## Baseline packages
+
+Homebrew first (it is not preinstalled); on Apple Silicon it lands in `/opt/homebrew`, which is not on
+`PATH` until you run its `shellenv` line:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+```bash
+brew install git zsh atuin direnv fzf zoxide diff-so-fancy thefuck rustup nvm
+brew install --cask alfred alt-tab iterm2 ghostty karabiner-elements secretive stats vlc
+```
+
+`nvm` is the brew build on purpose: `nvm_hook.zsh` sources `$(brew --prefix nvm)/nvm.sh`, not the
+install-script location. It also needs `mkdir -p ~/.nvm`, or every shell start errors on `$NVM_DIR`.
+
+`rustup` needs `rustup default stable` (it ships with no toolchain) plus the `PATH` fix below.
+
 ## Dotfiles from bash_hackery
 
 `ZSH_PACKAGES` self-locates via `realpath`, so wiring up is one line in `~/.zshrc`:
@@ -225,13 +244,14 @@ the packaging change was on the rustup side.
 Toolchains cost ~1.3–1.4 GB each. If disk gets tight, `rustup toolchain uninstall stable` is safe
 when every repo you touch pins its own channel.
 
-**`setup_mac.sh` is long broken** — its brew line reads `brew install git install zsh …`, so it tries
-to install a package literally named `install`. Install by hand.
+**There is no `setup_mac.sh`** — it was deleted. It had rotted unnoticed (its brew line read
+`brew install git install zsh …`, installing a package literally named `install`) precisely because a
+straight script can't check its own work. Install by hand, following this skill.
 
-### git config: base.gitconfig is only wired up on Linux
+### git config: base.gitconfig is not wired up by anything on macOS
 
-`setup_linux.sh:33` does `git config --global include.path "$(pwd)/base.gitconfig"`. **`setup_mac.sh`
-never does**, so on a fresh Mac none of it is active — no `pull.rebase`, no `push.autoSetupRemote`,
+`setup_linux.sh:33` does `git config --global include.path "$(pwd)/base.gitconfig"`. Nothing does this
+on a Mac, so on a fresh one none of it is active — no `pull.rebase`, no `push.autoSetupRemote`,
 no `rebase.autostash`, no vscode mergetool, and no `[user] name`.
 
 `base.gitconfig` deliberately sets **name but not email**, so both the include and the email are
@@ -243,6 +263,31 @@ git config --global user.name "Tommaso Checchi"          # explicit: survives ~/
 git config --global user.email "tommaso.checchi1@gmail.com"
 git config --global url."https://github.com/".insteadOf "git@github.com:"
 brew install diff-so-fancy                               # base.gitconfig sets it as core.pager
+
+# absolute path, NOT the short name "osxkeychain" — see below
+git config --global credential.helper \
+  /Library/Developer/CommandLineTools/usr/libexec/git-core/git-credential-osxkeychain
+```
+
+**Why the absolute path.** Apple's git sets `credential.helper = osxkeychain` in its own *system*
+gitconfig (`/Library/Developer/CommandLineTools/usr/share/git-core/gitconfig`), so the CLI works with
+nothing in `~/.gitconfig` at all — and that hides the problem. GUI clients ship their own git: Fork's
+is 2.50.1, and its system config path is `/usr/local/git/etc/gitconfig`, which doesn't exist. It
+therefore sees **no helper**, falls through to its `GIT_ASKPASS` dialog, and reuses whatever stale
+password it once stored — GitHub answers `Password authentication is not supported`.
+
+Setting the plain name `osxkeychain` globally is **not enough**. Git resolves it to
+`git-credential-osxkeychain` via its exec-path and `PATH`; Fork keeps that binary in `bin/` rather than
+`libexec/git-core/`, and a GUI app inherits a minimal `PATH`, so you get
+`git: 'credential-osxkeychain' is not a git command` on every push. The absolute path can't miss.
+
+The path belongs to Xcode Command Line Tools — going full-Homebrew-git and removing CLT brings the
+error back.
+
+Verify the way that actually proves it, with askpass disabled so only the helper can answer:
+
+```bash
+GIT_TERMINAL_PROMPT=0 GIT_ASKPASS=/usr/bin/false git ls-remote origin HEAD
 ```
 
 That `insteadOf` line is not optional once the include is active. `base.gitconfig` sets
