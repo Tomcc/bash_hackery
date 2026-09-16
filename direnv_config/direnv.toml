@@ -1,0 +1,4 @@
+[global]
+# Whitelist regex for direnv's own log lines; "^$" matches none, so direnv stays
+# quiet and p10k's instant prompt doesn't warn. .envrc errors still print.
+log_filter = "^$"

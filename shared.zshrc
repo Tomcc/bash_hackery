@@ -211,6 +211,10 @@ fi
 
 # ---------------- direnv ----------------
 
+# Our own config, which silences direnv's log chatter (see direnv_config/direnv.toml).
+# direnv 2.37 ignores DIRENV_LOG_FORMAT/DIRENV_LOG_FILTER, so it must go through a file.
+export DIRENV_CONFIG="$ZSH_PACKAGES/direnv_config"
+
 eval "$(direnv hook zsh)"
 
 if [[ "$WINDOWS" == "1" ]]; then
