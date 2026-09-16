@@ -127,6 +127,30 @@ Host <target>
 **TCC blocks sshd** from writing to `~/Desktop`, `~/Documents`, `~/Downloads` unless it has Full
 Disk Access. Dotfiles are unaffected; expect permission errors (not hangs) for those three.
 
+## API keys live in the Keychain, not in a file
+
+`keychain_env.zsh` (sourced on macOS via `USE_KEYCHAIN_ENV`) exports every key at shell start from
+Keychain items named `shell_env.<VARNAME>`. `save_key NAME value` adds one, `list_keys` enumerates,
+`delete_key NAME` removes — so adding a key never edits a dotfile. A fresh Mac starts with **no keys**;
+they are not in the repo. Copy them from another machine's Keychain, or re-issue them.
+
+macOS is the only platform with this. Linux still uses pexp (`USE_PEXP`), which keeps them in
+plaintext `~/.pexprc` and spawns the stdout-inheriting watcher that hangs `ssh host 'zsh -ilc ...'`.
+
+Four `security` behaviours this works around, all found the hard way:
+
+- **`-w` reading from stdin truncates at 128 characters, silently.** Long tokens come back cut with no
+  error at all. The value has to go through argv, brief `ps` exposure and all.
+- **`-U -A` on an *existing* item prompts for your login password** ("wants to change access
+  permissions"), once per item. Delete-then-add instead; `-A` on a *new* item is silent.
+- **`-w` hex-encodes any value containing a newline**, with no reliable way to tell that apart from a
+  value that merely looks like hex. `save_key` rejects newlines rather than guess.
+- **`dump-keychain` prints the service name twice per item** — once as `svce`, once as the default
+  label `0x00000007`. Count only `svce` lines or every item looks duplicated.
+
+Reads are batched into a single `security -i` process: one spawn per key costs ~900ms of shell
+startup, batched it is ~75ms.
+
 ## Baseline packages
 
 Homebrew first (it is not preinstalled); on Apple Silicon it lands in `/opt/homebrew`, which is not on

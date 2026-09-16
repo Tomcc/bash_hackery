@@ -6,6 +6,7 @@ LINUX=0
 USE_ANTIGEN=0
 USE_NVM=0
 USE_PEXP=0
+USE_KEYCHAIN_ENV=0
 
 # if linux
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -18,7 +19,8 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
 
     USE_ANTIGEN=1
     USE_NVM=1
-    USE_PEXP=1
+    # keys come from the Keychain here, so pexp's plaintext file and watcher aren't needed
+    USE_KEYCHAIN_ENV=1
 elif [[ "$OSTYPE" == "cygwin" ]]; then
     WINDOWS=1
 elif [[ "$OSTYPE" == "msys" ]]; then
@@ -89,10 +91,14 @@ if [[ "$LINUX" == "1" ]]; then
     eval $(ssh-agent -s) > /dev/null
 elif [[ "$MACOS" == "1" ]]; then
     # on mac, use secretive
-    export SSH_AUTH_SOCK="/Users/tommasochecchi/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
+    export SSH_AUTH_SOCK="$HOME/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
 fi
 
-# ---------------- pexp ----------------
+# ---------------- persistent env vars ----------------
+
+if [[ "$USE_KEYCHAIN_ENV" == "1" ]]; then
+    source $ZSH_PACKAGES/keychain_env.zsh
+fi
 
 if [[ "$USE_PEXP" == "1" ]]; then
     # setup pexp
@@ -137,8 +143,8 @@ alias watch_test='cargo watch --clear -- cargo nextest run'
 alias watch_bench='cargo watch --clear -- cargo bench'
 
 # Houdini Aliases
-alias hou_dpi_low="pexp HOUDINI_UISCALE 100 && echo 'Houdini DPI set to low'"
-alias hou_dpi_hi="pexp HOUDINI_UISCALE 200 && echo 'Houdini DPI set to high'"
+alias hou_dpi_low="save_key HOUDINI_UISCALE 100 && echo 'Houdini DPI set to low'"
+alias hou_dpi_hi="save_key HOUDINI_UISCALE 200 && echo 'Houdini DPI set to high'"
 
 # Robotopia aliases
 alias hammerbot="cargo run --release -p hammerbot --features aws -- "
@@ -199,8 +205,8 @@ if [[ "$WINDOWS" == "1" ]]; then
         start "$(cygpath -w "$1")"
     }
 else 
-    # Use python from uv
-    export PATH="/Users/tommasochecchi/.local/bin:$PATH"
+    # Use python from uv. Must stay ahead of /usr/bin, which ships python3 3.9.
+    export PATH="$HOME/.local/bin:$PATH"
 fi
 
 # ---------------- direnv ----------------
