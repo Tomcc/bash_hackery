@@ -394,20 +394,11 @@ Raycast) index `~/Applications` by default, so an app there is searchable with n
 ~/Developer/bash_hackery/bin/install_dark_mode_toggle.sh   # then type "toggle dark" in Alfred
 ```
 
-The script `osacompile`s a one-line AppleScript, marks it `LSUIElement` so it doesn't bounce the Dock
-or steal focus, and launches it once for the Automation prompt.
+First launch must be from the GUI, to answer the Automation prompt. **Dismiss that prompt and it is
+never shown again** — every later run just dies with `Not authorized to send Apple events (-1743)`.
+Rerunning the install script clears the stale grant so you get asked once more.
 
-**`osacompile` writes no `CFBundleIdentifier`**, and TCC cannot hang an Automation grant on a
-bundle-less app: the applet hangs on first launch and, if the prompt is dismissed or the process
-killed, every later run dies with `Not authorized to send Apple events to System Events (-1743)` and
-**never prompts again**. The script sets an identifier, re-signs ad-hoc, and resets the stale grant:
-
-```bash
-tccutil reset AppleEvents com.tommaso.toggle-dark-mode   # fails harmlessly if never launched yet
-```
-
-Also worth knowing: `defaults write -g AppleInterfaceStyle` is *not* an alternative — running apps
-don't pick it up. The Apple event is what actually notifies them.
+`defaults write -g AppleInterfaceStyle` is not an alternative: running apps don't pick it up.
 
 ## Migrating prefs to another Mac
 
