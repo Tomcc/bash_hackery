@@ -385,6 +385,30 @@ Takes effect immediately — **no logout needed** (verified on macOS 15.7.9). If
 switch it to another value and back in Settings to force a reload, since the pane will already
 display the value written by `defaults`.
 
+## Toggling light/dark mode from Alfred
+
+There is no system command for this, so we ship one as a tiny app bundle. Alfred (and Spotlight, and
+Raycast) index `~/Applications` by default, so an app there is searchable with no workflow involved:
+
+```bash
+~/Developer/bash_hackery/bin/install_dark_mode_toggle.sh   # then type "toggle dark" in Alfred
+```
+
+The script `osacompile`s a one-line AppleScript, marks it `LSUIElement` so it doesn't bounce the Dock
+or steal focus, and launches it once for the Automation prompt.
+
+**`osacompile` writes no `CFBundleIdentifier`**, and TCC cannot hang an Automation grant on a
+bundle-less app: the applet hangs on first launch and, if the prompt is dismissed or the process
+killed, every later run dies with `Not authorized to send Apple events to System Events (-1743)` and
+**never prompts again**. The script sets an identifier, re-signs ad-hoc, and resets the stale grant:
+
+```bash
+tccutil reset AppleEvents com.tommaso.toggle-dark-mode   # fails harmlessly if never launched yet
+```
+
+Also worth knowing: `defaults write -g AppleInterfaceStyle` is *not* an alternative — running apps
+don't pick it up. The Apple event is what actually notifies them.
+
 ## Migrating prefs to another Mac
 
 `scp`-ing a plist **loses silently**: `cfprefsd` caches the domain, and a running app rewrites it on
