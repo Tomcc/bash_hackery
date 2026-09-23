@@ -9,42 +9,29 @@ description: >
 
 # Start a Claude session in a new tab
 
-This is the Claude-session layer on top of **open-terminal-tab** — read that skill for the
-`osascript` spawn mechanics, the sandbox/`new tab` gotchas, and the blocking-with-FIFO pattern. The
-command you put in `initial input` is just `claude` (with flags):
+Spawn the tab with **open-terminal-tab** (osascript, sandbox, `new tab` target). Put `claude` in
+`initial input`:
 
 ```bash
-# (run the open-terminal-tab osascript with…)
 set initial input of cfg to "claude" & return            # fresh session
 set initial input of cfg to "claude -r <uuid>" & return  # resume a session
 ```
 
-A forked/resumed Claude session is interactive and never exits, so spawn it **fire-and-forget** —
-do NOT use the blocking FIFO pattern on it (it would hang your whole turn).
+- **Always** spawn fire-and-forget — a Claude session never exits, so the blocking FIFO pattern
+  would hang your turn.
+- Find past session UUIDs with **session-lookup-search**; see live ones with
+  **find-active-sessions**.
 
-## Finding the session UUID
+## Resume a session
 
-Use **session-lookup-search** (rg over `~/.claude/projects/...`) to find a past session, and
-**find-active-sessions** to see which are live right now.
+- **Always** set `initial working directory of cfg` to the project root the session started in —
+  `-r` looks sessions up by cwd, so a subdirectory (e.g. `tools/hammerbot`) silently finds nothing.
+- Resume only dead sessions: `claude -r <uuid>` conflicts with a session open in another tab. A
+  transcript written seconds ago is almost certainly live.
+- For a live session, or to borrow its context, start a fresh `claude` with a first prompt like
+  `Look at session <uuid> for context.`
 
-## Three rules that each cost real debugging time
+## Fork yourself
 
-- **Set the tab's working directory to the session's PROJECT ROOT.** `--resume`/`-r` looks the
-  session up under the project keyed by cwd, so launching from a subdirectory (e.g.
-  `tools/hammerbot` when the session began at the repo root) silently fails to find it. Set
-  `initial working directory of cfg` to the root the session started in.
-- **Check the session is NOT already running before resuming.** `claude -r <uuid>` on a session
-  already open in another tab conflicts. `find-active-sessions` shows live PIDs; a session whose
-  transcript was written seconds ago is almost certainly live.
-- **Forking yourself:** your own session id is in `$CLAUDE_CODE_SESSION_ID`.
-  `claude --fork-session --resume <id>` branches a copy with a NEW id that runs independently — it
-  does NOT see your subsequent turns and you don't see its. Divide work explicitly so the two
-  branches don't race the same files.
-
-## Resume vs. reference
-
-- Session is **dead** → resume it directly: `initial input` = `"claude -r <uuid>"`.
-- Session is **live** (or you want its context, not its history) → start a *fresh* session that
-  references the old one by UUID: `initial input` = `"claude"`, then a first prompt like
-  `Look at session <uuid> for context.` This is how ROB-699x issues were spun up off the parent
-  model-database session.
+`claude --fork-session --resume $CLAUDE_CODE_SESSION_ID` branches a copy with a new id. Neither side
+sees the other's later turns, so divide work explicitly and keep the two off the same files.
