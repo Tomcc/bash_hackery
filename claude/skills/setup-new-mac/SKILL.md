@@ -334,11 +334,12 @@ defaults import <domain> /tmp/x.plist        # on the target
 ## Install Unity headless via Hub
 
 Always pass `--architecture` (Hub otherwise waits on a prompt) and redirect to a file (piping to
-`tail` causes `write EPIPE`):
+`tail` causes `write EPIPE`). Run it with the Bash tool's `run_in_background`, never `nohup`, so it
+stays visible in the task list:
 
 ```bash
-nohup "/Applications/Unity Hub.app/Contents/MacOS/Unity Hub" -- --headless install \
-  --version 6000.0.31f1 --changeset a206c360e2a8 --architecture arm64 > /tmp/unity.log 2>&1 &
+"/Applications/Unity Hub.app/Contents/MacOS/Unity Hub" -- --headless install \
+  --version 6000.0.31f1 --changeset a206c360e2a8 --architecture arm64 > /tmp/unity.log 2>&1
 ```
 
 - Get the changeset from `ProjectSettings/ProjectVersion.txt` →
@@ -393,10 +394,11 @@ curl -s https://gdmf.apple.com/v2/pmv | python3 -c 'import json,sys; d=json.load
   pgrep -fil karabiner           # the app is "Karabiner-Elements"
   ```
 
-- Detach long clones — tool background jobs die on an unrelated interrupt (exit 144 = SIGTERM):
+- Run long clones with `run_in_background`, never `nohup`/`disown`. Pressing Esc in Claude Code
+  kills background jobs (exit 144 = SIGTERM); re-run the clone if that happens:
 
   ```bash
-  nohup git clone <url> > /tmp/clone.log 2>&1 & disown
+  git clone <url> > /tmp/clone.log 2>&1
   ```
 
 - Confirm success with `git status --porcelain | wc -l` reaching 0, not directory size.
