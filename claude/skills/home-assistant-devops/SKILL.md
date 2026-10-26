@@ -17,6 +17,8 @@ and push as you go. The device inventory is `docs/condo-manual.md`.
 
 - `http://hammerbot.tail094345.ts.net:8123` over Tailscale.
 - `http://192.168.4.122:8123` on the home Wi-Fi, for people without Tailscale.
+- **Call the API with `$HOME_ASSISTANT_KEY`**, an admin long-lived token kept in the Keychain by
+  bash_hackery's `save_key`: `curl -H "Authorization: Bearer $HOME_ASSISTANT_KEY" .../api/`.
 
 ## Deploy or update
 
