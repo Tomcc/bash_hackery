@@ -45,11 +45,18 @@ Everything lives in `~/Developer/home_claude` (private, `github.com/Tomcc/home_c
 - Operate the PC itself (SSH, RDP, the CI runner sharing it) per the repo skill
   `hammerbot-ci-devops` in `~/Developer/tomatocake-dev`.
 
-## Pair devices
+## Pairing new devices
+
+Follow the manual's "Pair a device" section. After every device joins, always do all of:
+
+1. **Name it and assign its area** in `ha/devices.yaml`, then `uv run scripts/sync_devices.py`.
+2. **Update its firmware**, after naming: a rename hides an update already in progress.
+3. **Save its official manual** to `docs/manuals/` (below), if it's a new model.
+4. **Commit and push.**
 
 - **Use the reset steps from the manual in `docs/manuals/`**, not from memory.
 - **Pair from the dongle outward**: mains-powered routers first, battery sensors last.
-- **Flash the latest firmware on every device right after it pairs**, via its `update.*` entity.
+- **Keep areas in `ha/areas.yaml`** (`uv run scripts/sync_areas.py`), never only in the HA UI.
 - **Keep bulbs off switched circuits as routers**: a bulb with its power cut drops its routes.
 - **Never delete the `z2m_data` volume**: it holds the network key, and losing it means
   re-pairing every device.
