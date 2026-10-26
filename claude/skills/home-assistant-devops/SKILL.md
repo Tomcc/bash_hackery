@@ -17,9 +17,9 @@ Everything lives in `~/Developer/home_claude` (private, `github.com/Tomcc/home_c
 ## Find the passwords
 
 - **Tommaso's HA password is in iCloud Passwords**, saved under the HA Tailscale name.
-- **The dongle's web console uses the same password as HA**: browsers can't save one for a raw IP
-  like `192.168.4.24`, so remind him of this when he needs it. `http://Dongle-M.local` is a
-  saveable name on the home Wi-Fi.
+- **The dongle's web console uses the same password as HA.**
+- **Always give Tommaso hostnames, never raw IPs**, for any page he opens: Passwords only saves and
+  autofills for names. Use `http://Dongle-M.local` (mDNS, home Wi-Fi) for the dongle.
 
 ## Never expose it to the internet
 
