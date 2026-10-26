@@ -39,6 +39,7 @@ Everything lives in `~/Developer/home_claude` (private, `github.com/Tomcc/home_c
 
 - **Use the reset steps from the manual in `docs/manuals/`**, not from memory.
 - **Pair from the dongle outward**: mains-powered routers first, battery sensors last.
+- **Flash the latest firmware on every device right after it pairs**, via its `update.*` entity.
 - **Keep bulbs off switched circuits as routers**: a bulb with its power cut drops its routes.
 - **Never delete the `z2m_data` volume**: it holds the network key, and losing it means
   re-pairing every device.
