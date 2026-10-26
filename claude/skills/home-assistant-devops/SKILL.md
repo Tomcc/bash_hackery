@@ -24,6 +24,9 @@ Everything lives in `~/Developer/home_claude` (private, `github.com/Tomcc/home_c
 ## Never expose it to the internet
 
 - **Reach HA only over the LAN or Tailscale**: no port forwards, tunnels, Nabu Casa or Funnel.
+- **Never leave admin access open by default**: every admin UI gets a login, and non-owner HA
+  accounts are non-admin. Network limits alone don't count; the tailnet has teammates' machines.
+- **Keep secrets in the Keychain via `save_key`**, never in git; `deploy.sh` turns them into `.env`.
 - **Prefer local Zigbee devices over Wi-Fi/cloud ones** when suggesting purchases.
 
 ## Prefer declarative config
