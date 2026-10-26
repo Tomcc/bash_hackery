@@ -41,7 +41,9 @@ Everything lives in `~/Developer/home_claude` (private, `github.com/Tomcc/home_c
 
 - **Deploy only with `./deploy.sh`**, never `docker compose pull` over SSH: Docker's credential
   helper fails in passwordless logons with `A specified logon session does not exist`.
-- **Pin exact image versions**, never `stable` or `latest`.
+- **Keep moving tags** (HA `stable`, others their major version like `2`): the deploy task
+  pulls nightly at 4am. Never `latest`, `beta` or `dev`.
+- **Never deploy during a Zigbee firmware update**: recreating Zigbee2MQTT aborts it.
 - Operate the PC itself (SSH, RDP, the CI runner sharing it) per the repo skill
   `hammerbot-ci-devops` in `~/Developer/tomatocake-dev`.
 
