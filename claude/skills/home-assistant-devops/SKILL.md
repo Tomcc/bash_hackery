@@ -34,6 +34,10 @@ Everything lives in `~/Developer/home_claude` (private, `github.com/Tomcc/home_c
 - **Put settings in `compose.yaml`** (`ZIGBEE2MQTT_CONFIG_*` env vars) or YAML in git, never only
   in a UI.
 - **Script UI-only HA setup through the API**, then record the exact call in the manual.
+- **Keep automations in `ha/automations/`, HTTP settings in `ha/http.yaml`**: HA ignores `http:`
+  in `configuration.yaml` since 2026.10.
+- **Check HA's repair list after every change** (`repairs/list_issues`): it's where HA says a
+  setting is ignored.
 - **Call the API with `$HOME_ASSISTANT_KEY`**, an admin long-lived token kept in the Keychain by
   bash_hackery's `save_key`: `curl -H "Authorization: Bearer $HOME_ASSISTANT_KEY" .../api/`.
 
