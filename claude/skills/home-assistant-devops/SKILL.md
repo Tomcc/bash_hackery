@@ -14,6 +14,13 @@ Everything lives in `~/Developer/home_claude` (private, `github.com/Tomcc/home_c
 - **Update the manual in the same commit** whenever the setup changes, so a fresh session can
   rebuild it from the docs alone.
 
+## Find the passwords
+
+- **Tommaso's HA password is in iCloud Passwords**, saved under the HA Tailscale name.
+- **The dongle's web console uses the same password as HA**: browsers can't save one for a raw IP
+  like `192.168.4.24`, so remind him of this when he needs it. `http://Dongle-M.local` is a
+  saveable name on the home Wi-Fi.
+
 ## Never expose it to the internet
 
 - **Reach HA only over the LAN or Tailscale**: no port forwards, tunnels, Nabu Casa or Funnel.
