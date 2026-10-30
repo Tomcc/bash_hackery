@@ -4,8 +4,9 @@
 # Persistent env vars stored in the macOS Keychain instead of a plaintext ~/.pexprc.
 # Also drops pexp's watcher daemon, which inherited stdout and hung `ssh host 'zsh -ilc ...'`.
 
-KEYCHAIN_ENV_PREFIX="shell_env."
-KEYCHAIN_ENV_ACCOUNT="$USER"
+# Exported because Claude Code's shell snapshot keeps functions but drops plain variables.
+export KEYCHAIN_ENV_PREFIX="shell_env."
+export KEYCHAIN_ENV_ACCOUNT="$USER"
 
 # Names of every stored key. The name lives in the service attribute so each output line stands
 # alone, and awk keeps shell startup independent of brew-installed tools like rg.
